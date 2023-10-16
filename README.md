@@ -4,7 +4,7 @@ Developed by native UGUI system, no any magical code inside, so you can easily m
 
 ## Install via git URL
 ``` 
-https://github.com/michael811125/InfiniteScrollView-with-UniTask?path=Assets/InfiniteScrollView/Scripts
+https://github.com/michael811125/InfiniteScrollView-with-UniTask.git?path=Assets/InfiniteScrollView/Scripts
 ```
 
 ## Features

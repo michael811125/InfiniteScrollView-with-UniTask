@@ -18,11 +18,11 @@
        "displayName": "Infinite Grid Demo",
        "path": "Samples~/03_Grid"
      },
-{    
+     {    
        "displayName": "Infinite TabPage Demo",
        "path": "Samples~/04_TabPage"
      },
-{    
+     {    
        "displayName": "Infinite ChatRoom Demo",
        "path": "Samples~/05_ChatRoom"
      }
