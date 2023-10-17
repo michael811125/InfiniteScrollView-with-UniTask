@@ -1,0 +1,35 @@
+﻿using HowTungTung;
+using System;
+using Cysharp.Threading.Tasks;
+
+/// <summary>
+/// Cell Data
+/// </summary>
+public class #SCRIPTNAME#Data
+{
+    public #SCRIPTNAME#Data() { }
+
+    // Set callback of parsing method
+    public Action<#SCRIPTNAME#> parsing;
+}
+
+/// <summary>
+/// Cell View
+/// </summary>
+public class #SCRIPTNAME# : InfiniteCell
+{
+    public override async UniTask Initialize(object args = null)
+    {
+        /**
+         * Do Somethings Init Once Components In Here
+         */
+    }
+
+    public override void OnUpdate()
+    {
+        // Get data
+        #SCRIPTNAME#Data cellData = this.CellData.data as #SCRIPTNAME#Data;
+        // Invoke parsing callback
+        cellData.parsing.Invoke(this);
+    }
+}

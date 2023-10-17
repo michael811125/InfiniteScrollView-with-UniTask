@@ -189,7 +189,7 @@ namespace HowTungTung
         /// Move to target
         /// </summary>
         /// <param name="child"></param>
-        public void ScrollToTarget(RectTransform child)
+        public void ScrollToTarget(Transform child)
         {
             if (this.scrollRect == null || child == null) return;
             Canvas.ForceUpdateCanvases();
