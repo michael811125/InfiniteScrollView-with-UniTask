@@ -14,7 +14,7 @@ namespace HowTungTung
             get
             {
                 if (rectTransform == null)
-                    rectTransform = GetComponent<RectTransform>();
+                    rectTransform = transform as RectTransform;
                 return rectTransform;
             }
         }
@@ -33,7 +33,7 @@ namespace HowTungTung
             }
         }
 
-        public virtual async UniTask Initialize(object args) { await UniTask.Yield(); }
+        public virtual async UniTask Initialize(object args) { }
 
         public virtual void OnUpdate() { }
 

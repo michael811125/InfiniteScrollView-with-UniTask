@@ -123,16 +123,12 @@ namespace HowTungTung
 
         public override async UniTask Remove(int index, bool withRefresh = true)
         {
-            try
-            {
-                var removeCell = dataList[index];
-                await base.Remove(index, withRefresh);
-                scrollRect.content.anchoredPosition -= new Vector2(removeCell.cellSize.x + spacing, 0);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning(ex);
-            }
+            if (index >= dataList.Count)
+                return;
+
+            var removeCell = dataList[index];
+            await base.Remove(index, withRefresh);
+            scrollRect.content.anchoredPosition -= new Vector2(removeCell.cellSize.x + spacing, 0);
         }
     }
 }

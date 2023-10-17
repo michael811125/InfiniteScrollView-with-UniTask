@@ -119,9 +119,7 @@ namespace HowTungTung
 
             dataList.Add(data);
             cellList.Add(null);
-
-            this.RefreshCellDataIndex();
-
+            this.RefreshCellDataIndex(dataList.Count - 1);
             if (autoRefresh) await Refresh();
         }
 
@@ -138,10 +136,12 @@ namespace HowTungTung
                 await Initialize();
             }
 
+            if (index > dataList.Count)
+                return;
+
             dataList.Insert(index, data);
             cellList.Insert(index, null);
-
-            this.RefreshCellDataIndex();
+            this.RefreshCellDataIndex(index);
         }
 
         /// <summary>
@@ -156,12 +156,14 @@ namespace HowTungTung
             {
                 await Initialize();
             }
-            if (dataList.Count == 0)
+
+            if (index >= dataList.Count)
                 return;
 
             dataList.RemoveAt(index);
-            this.RefreshCellDataIndex();
-
+            this.RefreshCellDataIndex(index);
+            RecycleCell(index);
+            cellList.RemoveAt(index);
             if (autoRefresh) await Refresh();
         }
 
@@ -345,9 +347,10 @@ namespace HowTungTung
             }
         }
 
-        private void RefreshCellDataIndex()
+        private void RefreshCellDataIndex(int beginIndex)
         {
-            for (int i = 0; i < dataList.Count; i++)
+            // Optimized refresh efficiency
+            for (int i = beginIndex; i < dataList.Count; i++)
             {
                 dataList[i].index = i;
             }
