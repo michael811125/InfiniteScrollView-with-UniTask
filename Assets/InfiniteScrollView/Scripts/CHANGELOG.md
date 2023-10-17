@@ -1,5 +1,8 @@
 ## CHANGELOG
 
+## [1.1.0] - 2023-10-17
+- Added Cell script editor.
+
 ## [1.0.1] - 2023-10-17
 - Fixed cellList count increase bug issue.
 - Optimized InfiniteScrollView.

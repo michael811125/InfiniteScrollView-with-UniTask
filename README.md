@@ -7,6 +7,9 @@ Developed by native UGUI system, no any magical code inside, so you can easily m
 https://github.com/michael811125/InfiniteScrollView-with-UniTask.git?path=Assets/InfiniteScrollView/Scripts
 ```
 
+## Cell Script Template
+![](https://github.com/michael811125/InfiniteScrollView-with-UniTask/blob/master/Docs/img_1.png)
+
 ## Features
 1. Easy customize by OOP concept
 2. Support different cell height or width
