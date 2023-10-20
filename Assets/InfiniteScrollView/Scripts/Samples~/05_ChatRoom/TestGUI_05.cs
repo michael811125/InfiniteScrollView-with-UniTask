@@ -16,7 +16,7 @@ public class TestGUI_05 : MonoBehaviour
     private async void Awake()
     {
         // Init cells first
-        await chatScrollView.Initialize();
+        await chatScrollView.InitializePool();
     }
 
     private void OnGUI()

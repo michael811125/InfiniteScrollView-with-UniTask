@@ -33,13 +33,21 @@ namespace HowTungTung
             }
         }
 
-        public virtual async UniTask Initialize(object args) { }
+        public virtual async UniTask OnCreate(object args) { }
 
         public virtual void OnUpdate() { }
 
         public virtual void OnRecycle() { }
 
-        public void InvokeSelected()
+        /// <summary>
+        /// Button event
+        /// </summary>
+        public void OnClick()
+        {
+            this.InvokeSelected();
+        }
+
+        protected void InvokeSelected()
         {
             if (onSelected != null)
                 onSelected.Invoke(this);

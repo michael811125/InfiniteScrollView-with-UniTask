@@ -11,9 +11,4 @@ public class DemoVerticalGridCell : InfiniteCell
         RectTransform.sizeDelta = CellData.cellSize;
         text.text = CellData.index.ToString();
     }
-
-    public void OnClicked()
-    {
-        InvokeSelected();
-    }
 }

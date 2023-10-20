@@ -4,7 +4,7 @@ namespace HowTungTung
 {
     public class InfiniteCellData
     {
-        public int index;
+        public int index { get; internal set; }
         public Vector2 cellSize;
         public object data;
 

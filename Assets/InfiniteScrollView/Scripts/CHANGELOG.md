@@ -1,5 +1,19 @@
 ## CHANGELOG
 
+## [1.2.0] - 2023-10-20
+- Added [initializePoolOnAwake] trigger for InfiniteScrollView.
+- Added OnClick in InfiniteCell for button event (Can assign event on button click).
+- Modified InfiniteScrollView method name (Initialize change to InitializePool).
+```C#
+    public virtual async UniTask InitializePool(object args = null)
+```
+- Modified InfiniteCell method name (Initialize change to OnCreate).
+```C#
+    public virtual async UniTask OnCreate(object args) { }
+```
+- Modified InfiniteCellData index access modifier (Only internal can set).
+- Optimizd index determines.
+
 ## [1.1.0] - 2023-10-17
 - Added Cell script editor.
 

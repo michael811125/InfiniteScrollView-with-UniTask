@@ -33,6 +33,7 @@ namespace HowTungTung
             public int right;
         }
 
+        public bool initializePoolOnAwake = false;
         public int cellPoolSize = 20;
         public float extendVisibleRange;
 
@@ -55,11 +56,19 @@ namespace HowTungTung
             protected set;
         }
 
+        protected override async void Awake()
+        {
+            if (this.initializePoolOnAwake)
+            {
+                await this.InitializePool();
+            }
+        }
+
         /// <summary>
         /// Init infinite-cell of scrollView
         /// </summary>
         /// <returns></returns>
-        public virtual async UniTask Initialize(object args = null)
+        public virtual async UniTask InitializePool(object args = null)
         {
             if (IsInitialized)
                 return;
@@ -80,7 +89,7 @@ namespace HowTungTung
             for (int i = 0; i < cellPoolSize; i++)
             {
                 var newCell = Instantiate(cellPrefab, scrollRect.content);
-                await newCell.Initialize(args);
+                await newCell.OnCreate(args);
                 newCell.gameObject.SetActive(false);
                 cellPool.Enqueue(newCell);
             }
@@ -114,7 +123,7 @@ namespace HowTungTung
         {
             if (!IsInitialized)
             {
-                await Initialize();
+                await InitializePool();
             }
 
             dataList.Add(data);
@@ -133,10 +142,12 @@ namespace HowTungTung
         {
             if (!IsInitialized)
             {
-                await Initialize();
+                await InitializePool();
             }
 
-            if (index > dataList.Count)
+            // Insert including max count
+            if (index > dataList.Count ||
+                index < 0)
                 return;
 
             dataList.Insert(index, data);
@@ -154,10 +165,11 @@ namespace HowTungTung
         {
             if (!IsInitialized)
             {
-                await Initialize();
+                await InitializePool();
             }
 
-            if (index >= dataList.Count)
+            if (index >= dataList.Count ||
+                index < 0)
                 return;
 
             dataList.RemoveAt(index);
@@ -326,7 +338,7 @@ namespace HowTungTung
         public virtual async UniTask Clear()
         {
             if (IsInitialized == false)
-                await Initialize();
+                await InitializePool();
             scrollRect.velocity = Vector2.zero;
             scrollRect.content.anchoredPosition = Vector2.zero;
             dataList.Clear();

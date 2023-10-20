@@ -10,11 +10,11 @@ namespace HowTungTung
         public bool isAtTop = true;
         public bool isAtBottom = true;
 
-        public override async UniTask Initialize(object args = null)
+        public override async UniTask InitializePool(object args = null)
         {
             if (this.IsInitialized) return;
 
-            await base.Initialize(args);
+            await base.InitializePool(args);
             isAtTop = true;
             isAtBottom = true;
         }
@@ -66,7 +66,7 @@ namespace HowTungTung
         {
             if (!IsInitialized)
             {
-                await Initialize();
+                await InitializePool();
             }
             if (scrollRect.viewport.rect.height == 0)
             {
@@ -107,7 +107,8 @@ namespace HowTungTung
         {
             if (!IsInitialized)
                 return;
-            if (index >= dataList.Count)
+            if (index >= dataList.Count ||
+                index < 0)
                 return;
             if (scrollRect.content.rect.height < scrollRect.viewport.rect.height)
                 return;
@@ -127,7 +128,8 @@ namespace HowTungTung
 
         public override async UniTask Remove(int index, bool withRefresh = true)
         {
-            if (index >= dataList.Count)
+            if (index >= dataList.Count ||
+                index < 0)
                 return;
 
             var removeCell = dataList[index];

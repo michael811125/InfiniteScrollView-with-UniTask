@@ -71,7 +71,7 @@ namespace HowTungTung
         {
             if (!IsInitialized)
             {
-                await Initialize();
+                await InitializePool();
             }
             if (scrollRect.viewport.rect.width == 0)
             {
@@ -112,7 +112,8 @@ namespace HowTungTung
         {
             if (!IsInitialized)
                 return;
-            if (index >= dataList.Count)
+            if (index >= dataList.Count ||
+                index < 0)
                 return;
             var columeNumber = index / rowCount;
             float width = padding.left;

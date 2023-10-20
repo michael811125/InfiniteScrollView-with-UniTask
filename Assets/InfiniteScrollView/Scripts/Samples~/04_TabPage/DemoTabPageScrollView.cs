@@ -17,7 +17,7 @@ public class DemoTabPageScrollView : MonoBehaviour, IBeginDragHandler, IEndDragH
     private async void Awake()
     {
         // Init cells first
-        await scrollView.Initialize();
+        await scrollView.InitializePool();
     }
 
     private void Start()

@@ -18,7 +18,7 @@ public class #SCRIPTNAME#Data
 /// </summary>
 public class #SCRIPTNAME# : InfiniteCell
 {
-    public override async UniTask Initialize(object args = null)
+    public override async UniTask OnCreate(object args = null)
     {
         /**
          * Do Somethings Init Once Components In Here
@@ -31,5 +31,12 @@ public class #SCRIPTNAME# : InfiniteCell
         #SCRIPTNAME#Data cellData = this.CellData.data as #SCRIPTNAME#Data;
         // Invoke parsing callback
         cellData.parsing.Invoke(this);
+    }
+    
+    public override void OnRecycle()
+    {
+        /**
+         * Do Somethings On Cell Recycle In Here
+         */
     }
 }

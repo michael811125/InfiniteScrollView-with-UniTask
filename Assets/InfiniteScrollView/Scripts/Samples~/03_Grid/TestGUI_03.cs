@@ -17,7 +17,7 @@ public class TestGUI_03 : MonoBehaviour
     {
         infiniteScrollView = FindObjectOfType<InfiniteScrollView>();
         // Init cells first
-        await infiniteScrollView.Initialize();
+        await infiniteScrollView.InitializePool();
         infiniteScrollView.onCellSelected += OnCellSelected;
     }
 
