@@ -42,13 +42,17 @@ namespace HowTungTung
         public List<InfiniteCellData> dataList = new List<InfiniteCellData>();
         public List<InfiniteCell> cellList = new List<InfiniteCell>();
         protected Queue<InfiniteCell> cellPool = new Queue<InfiniteCell>();
-        private CancellationTokenSource _cts;
-        public event Action onRectTransformUpdate;
-        public Action<Vector2> onValueChanged;
-        public event Action<InfiniteCell> onCellSelected;
-        public Action onRefresh;
         public SnapAlign snapAlign = SnapAlign.Start;
         public Padding padding;
+
+        // Callbacks
+        public Action<Vector2> onValueChanged;
+        public event Action onRectTransformDimensionsChanged;
+        public event Action<InfiniteCell> onCellSelected;
+        public Action onRefreshed;
+
+        // Task cancellation
+        private CancellationTokenSource _cts;
 
         public bool IsInitialized
         {
@@ -355,7 +359,7 @@ namespace HowTungTung
             base.OnRectTransformDimensionsChange();
             if (scrollRect)
             {
-                onRectTransformUpdate?.Invoke();
+                onRectTransformDimensionsChanged?.Invoke();
             }
         }
 

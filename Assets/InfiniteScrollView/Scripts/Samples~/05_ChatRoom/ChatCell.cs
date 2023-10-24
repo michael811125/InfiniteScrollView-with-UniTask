@@ -8,7 +8,7 @@ public class ChatCell : InfiniteCell
     public Text speakerText;
     public Text messageText;
 
-    public override void OnUpdate()
+    public override void OnRefresh()
     {
         // Get cell data
         ChatCellData data = (ChatCellData)CellData.data;

@@ -6,7 +6,7 @@ public class DemoTabPageCell : InfiniteCell
 {
     public Text text;
 
-    public override void OnUpdate()
+    public override void OnRefresh()
     {
         DemoTabPageData data = (DemoTabPageData)CellData.data;
         RectTransform.sizeDelta = CellData.cellSize;

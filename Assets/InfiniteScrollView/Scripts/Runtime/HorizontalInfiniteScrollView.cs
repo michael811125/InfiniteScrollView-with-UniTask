@@ -92,7 +92,7 @@ namespace HowTungTung
             width += padding.right;
             scrollRect.content.sizeDelta = new Vector2(width, scrollRect.content.sizeDelta.y);
             this.RefreshCellVisibility();
-            onRefresh?.Invoke();
+            onRefreshed?.Invoke();
         }
 
         private async UniTask DelayToRefresh()

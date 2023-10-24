@@ -25,7 +25,7 @@ namespace HowTungTung
             set
             {
                 cellData = value;
-                OnUpdate();
+                OnRefresh();
             }
             get
             {
@@ -35,7 +35,7 @@ namespace HowTungTung
 
         public virtual async UniTask OnCreate(object args) { }
 
-        public virtual void OnUpdate() { }
+        public virtual void OnRefresh() { }
 
         public virtual void OnRecycle() { }
 

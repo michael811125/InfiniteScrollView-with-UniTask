@@ -1,5 +1,14 @@
 ## CHANGELOG
 
+## [1.2.1] - 2023-10-24
+- Modified InfiniteCell method name (OnUpdate change to OnRefresh more clear).
+```C#
+    public virtual void OnRefresh() { }
+```
+- Modified callback names in InfiniteScrollView.
+  - onRectTransformUpdate change to onRectTransformDimensionsChanged.
+  - onRefresh change onRefreshed.
+
 ## [1.2.0] - 2023-10-20
 - Added [initializePoolOnAwake] trigger for InfiniteScrollView.
 - Added OnClick in InfiniteCell for button event (Can assign event on button click).
