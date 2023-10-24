@@ -25,7 +25,7 @@ public class #SCRIPTNAME# : InfiniteCell
          */
     }
 
-    public override void OnUpdate()
+    public override void OnRefresh()
     {
         // Get data
         #SCRIPTNAME#Data cellData = this.CellData.data as #SCRIPTNAME#Data;
