@@ -33,17 +33,30 @@ namespace HowTungTung
             public int right;
         }
 
+        [Header("------ Cell Pool Options ------")]
         public bool initializePoolOnAwake = false;
         public int cellPoolSize = 20;
-        public float extendVisibleRange;
-
         public InfiniteCell cellPrefab;
-        public ScrollRect scrollRect;
+
+        [Space()]
+
+        [Header("------ Cell View Options ------")]
+        public float extendVisibleRange;
+        [HideInInspector] public ScrollRect scrollRect;
         public List<InfiniteCellData> dataList = new List<InfiniteCellData>();
-        public List<InfiniteCell> cellList = new List<InfiniteCell>();
-        protected Queue<InfiniteCell> cellPool = new Queue<InfiniteCell>();
+        [HideInInspector] public List<InfiniteCell> cellList = new List<InfiniteCell>();
+        protected Queue<InfiniteCell> _cellPool = new Queue<InfiniteCell>();
         public SnapAlign snapAlign = SnapAlign.Start;
         public Padding padding;
+
+        // Direction pivot 
+        protected float _contentDirCoeff = 0;
+
+        // Scroll status
+        protected bool _isAtTop = false;
+        protected bool _isAtBottom = false;
+        protected bool _isAtLeft = false;
+        protected bool _isAtRight = false;
 
         // Callbacks
         public Action<Vector2> onValueChanged;
@@ -77,10 +90,11 @@ namespace HowTungTung
             if (IsInitialized)
                 return;
 
-            if (scrollRect == null) scrollRect = GetComponent<ScrollRect>();
+            if (scrollRect == null) scrollRect = this.GetComponent<ScrollRect>();
             scrollRect.onValueChanged.RemoveAllListeners();
             scrollRect.onValueChanged.AddListener(OnValueChanged);
 
+            // Clear children
             foreach (Transform trans in this.scrollRect.content)
             {
                 Destroy(trans.gameObject);
@@ -88,14 +102,14 @@ namespace HowTungTung
 
             dataList.Clear();
             cellList.Clear();
-            cellPool.Clear();
+            _cellPool.Clear();
 
             for (int i = 0; i < cellPoolSize; i++)
             {
                 var newCell = Instantiate(cellPrefab, scrollRect.content);
                 await newCell.OnCreate(args);
                 newCell.gameObject.SetActive(false);
-                cellPool.Enqueue(newCell);
+                _cellPool.Enqueue(newCell);
             }
             IsInitialized = true;
         }
@@ -184,16 +198,7 @@ namespace HowTungTung
         }
 
         /// <summary>
-        /// Move to bottom
-        /// </summary>
-        public void ScrollToBottom()
-        {
-            if (this.scrollRect == null) return;
-            this.scrollRect.verticalNormalizedPosition = 0;
-        }
-
-        /// <summary>
-        /// Move to top
+        /// Scroll to top
         /// </summary>
         public void ScrollToTop()
         {
@@ -202,20 +207,30 @@ namespace HowTungTung
         }
 
         /// <summary>
-        /// Move to target
+        /// Scroll to bottom
         /// </summary>
-        /// <param name="child"></param>
-        public void ScrollToTarget(Transform child)
+        public void ScrollToBottom()
         {
-            if (this.scrollRect == null || child == null) return;
-            Canvas.ForceUpdateCanvases();
-            Vector2 viewportLocalPosition = this.scrollRect.viewport.localPosition;
-            Vector2 childLocalPosition = child.localPosition;
-            Vector2 result = new Vector2(
-                0 - (viewportLocalPosition.x + childLocalPosition.x),
-                0 - (viewportLocalPosition.y + childLocalPosition.y)
-            );
-            this.scrollRect.content.localPosition = result;
+            if (this.scrollRect == null) return;
+            this.scrollRect.verticalNormalizedPosition = 0;
+        }
+
+        /// <summary>
+        /// Scroll to left
+        /// </summary>
+        public void ScrollToLeft()
+        {
+            if (this.scrollRect == null) return;
+            this.scrollRect.horizontalNormalizedPosition = 0;
+        }
+
+        /// <summary>
+        /// Scroll to right
+        /// </summary>
+        public void ScrollToRight()
+        {
+            if (this.scrollRect == null) return;
+            this.scrollRect.horizontalNormalizedPosition = 1;
         }
 
         /// <summary>
@@ -223,11 +238,12 @@ namespace HowTungTung
         /// </summary>
         /// <param name="topDistance"></param>
         /// <returns></returns>
-        public bool IsScrollToTop(float topDistance = 0)
+        public bool IsAtTop()
         {
             if (this.scrollRect == null) return false;
-            if (this.scrollRect.content.anchoredPosition.y <= 0 + topDistance) return true;
-            return false;
+            // Adjust direction (Vertical = 1, Vertical Reverse = -1)
+            bool result = this._contentDirCoeff > 0 ? this._isAtTop : this._isAtBottom;
+            return result;
         }
 
         /// <summary>
@@ -235,11 +251,36 @@ namespace HowTungTung
         /// </summary>
         /// <param name="bottomDistance"></param>
         /// <returns></returns>
-        public bool IsScrollToBottom(float bottomDistance = 0)
+        public bool IsAtBottom()
         {
             if (this.scrollRect == null) return false;
-            if (this.scrollRect.content.anchoredPosition.y + this.scrollRect.viewport.rect.height >= this.scrollRect.content.rect.height - bottomDistance) return true;
-            return false;
+            // Adjust direction (Vertical = 1, Vertical Reverse = -1)
+            bool result = this._contentDirCoeff > 0 ? this._isAtBottom : this._isAtTop;
+            return result;
+        }
+
+        /// <summary>
+        /// Check view to left
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAtLeft()
+        {
+            if (this.scrollRect == null) return false;
+            // Adjust direction (Horizontal = -1, Horizontal Reverse = 1)
+            bool result = this._contentDirCoeff > 0 ? this._isAtRight : this._isAtLeft;
+            return result;
+        }
+
+        /// <summary>
+        /// Check view to right
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAtRight()
+        {
+            if (this.scrollRect == null) return false;
+            // Adjust direction (Horizontal = -1, Horizontal Reverse = 1)
+            bool result = this._contentDirCoeff > 0 ? this._isAtLeft : this._isAtRight;
+            return result;
         }
 
         /// <summary>
@@ -249,6 +290,10 @@ namespace HowTungTung
         /// <param name="duration"></param>
         public abstract void Snap(int index, float duration);
 
+        /// <summary>
+        /// Move to last cell
+        /// </summary>
+        /// <param name="duration"></param>
         public void SnapLast(float duration)
         {
             Snap(dataList.Count - 1, duration);
@@ -304,17 +349,15 @@ namespace HowTungTung
             this._cts = null;
         }
 
-        protected void SetupCell(int index, Vector2 pos)
+        protected void SetupCell(InfiniteCell cell, int index, Vector2 pos)
         {
-            if (cellList[index] == null)
-            {
-                var cell = cellPool.Dequeue();
-                cell.gameObject.SetActive(true);
-                cell.CellData = dataList[index];
-                cell.RectTransform.anchoredPosition = pos;
-                cellList[index] = cell;
-                cell.onSelected += OnCellSelected;
-            }
+            if (cell == null) return;
+
+            cell.gameObject.SetActive(true);
+            cell.CellData = dataList[index];
+            cell.RectTransform.anchoredPosition = pos;
+            cellList[index] = cell;
+            cell.onSelected += OnCellSelected;
         }
 
         protected void RecycleCell(int index)
@@ -323,7 +366,7 @@ namespace HowTungTung
             {
                 var cell = cellList[index];
                 cellList[index] = null;
-                cellPool.Enqueue(cell);
+                _cellPool.Enqueue(cell);
                 cell.gameObject.SetActive(false);
                 cell.OnRecycle();
                 cell.onSelected -= OnCellSelected;

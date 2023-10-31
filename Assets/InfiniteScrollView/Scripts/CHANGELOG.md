@@ -1,5 +1,29 @@
 ## CHANGELOG
 
+## [1.3.0] - 2023-10-31
+- Modified All infiniteScrollViews can auto calculate direction by content and cell pivot.
+- Modified Samples (Normal direction and Reverse direction).
+- Added ScrollToLeft and ScrollToRight (Horizontal).
+```C#
+    public void ScrollToLeft()
+    public void ScrollToRight()
+```
+- Added InfiniteScrollView IsAtLeft and IsAtRight.
+```C#
+    public bool IsAtLeft()
+    public bool IsAtRight()
+```
+- Rename InfiniteScrollView IsScrollToTop method name to IsAtTop.
+```C#
+    public bool IsAtTop()
+```
+- Rename InfiniteScrollView IsScrollToBottom method name to IsAtBottom.
+```C#
+    public bool IsAtBottom()
+```
+- Removed ScrollToTarget method from InfiniteScrollView.
+- Optimized code.
+
 ## [1.2.1] - 2023-10-24
 - Modified InfiniteCell method name (OnUpdate change to OnRefresh more clear).
 ```C#

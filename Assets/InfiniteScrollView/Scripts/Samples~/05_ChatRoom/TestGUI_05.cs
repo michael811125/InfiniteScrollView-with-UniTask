@@ -1,7 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using HowTungTung;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class TestGUI_05 : MonoBehaviour
@@ -15,16 +14,13 @@ public class TestGUI_05 : MonoBehaviour
 
     private async void Awake()
     {
+        chatScrollView = FindObjectOfType<InfiniteScrollView>();
         // Init cells first
         await chatScrollView.InitializePool();
     }
 
     private void OnGUI()
     {
-        if (GUILayout.Button("NextScene"))
-        {
-            SceneManager.LoadScene((int)Mathf.Repeat(SceneManager.GetActiveScene().buildIndex + 1, SceneManager.sceneCountInBuildSettings));
-        }
         GUILayout.Label("Speaker");
         speaker = GUILayout.TextField(speaker);
         GUILayout.Label("Message");
@@ -33,7 +29,6 @@ public class TestGUI_05 : MonoBehaviour
         {
             AddChatData(new ChatCellData(speaker, message, false));
         }
-
     }
 
     public void OnSubmit(string input)

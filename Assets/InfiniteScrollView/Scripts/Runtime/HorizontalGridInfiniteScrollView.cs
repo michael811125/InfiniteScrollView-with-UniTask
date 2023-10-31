@@ -7,8 +7,6 @@ namespace HowTungTung
     {
         public Vector2 spacing;
         public int rowCount = 1;
-        public bool isAtLeft = true;
-        public bool isAtRight = true;
 
         public override void RefreshCellVisibility()
         {
@@ -16,9 +14,18 @@ namespace HowTungTung
             {
                 rowCount = 1;
             }
+
+            // Viewport
             float viewportInterval = scrollRect.viewport.rect.width;
-            float minViewport = -scrollRect.content.anchoredPosition.x;
+
+            // Check content direction pivot
+            if (this._contentDirCoeff == 0) this._contentDirCoeff = scrollRect.content.pivot.x > 0 ? 1f : -1f;
+
+            // Set content direction
+            float minViewport = scrollRect.content.anchoredPosition.x * this._contentDirCoeff;
             Vector2 viewportRange = new Vector2(minViewport - extendVisibleRange, minViewport + viewportInterval + extendVisibleRange);
+
+            // Hide
             float contentWidth = padding.left;
             for (int i = 0; i < dataList.Count; i += rowCount)
             {
@@ -35,6 +42,8 @@ namespace HowTungTung
                 }
                 contentWidth += dataList[i].cellSize.x + spacing.x;
             }
+
+            // Show
             contentWidth = padding.left;
             for (int i = 0; i < dataList.Count; i += rowCount)
             {
@@ -46,7 +55,16 @@ namespace HowTungTung
                     var visibleRange = new Vector2(contentWidth, contentWidth + dataList[index].cellSize.x);
                     if (visibleRange.y >= viewportRange.x && visibleRange.x <= viewportRange.y)
                     {
-                        SetupCell(index, new Vector2(contentWidth, (dataList[index].cellSize.y + spacing.y) * -j + -(padding.top - padding.bottom)));
+                        InfiniteCell cell = null;
+                        if (cellList[index] == null)
+                        {
+                            if (_cellPool.Count > 0) cell = _cellPool.Dequeue();
+                            else Debug.Log("<color=#ff4242>The cell display error occurred, not enough cells in the cell pool!!!</color>");
+                        }
+                        // Check cell direciton pivot
+                        float dirCoeff = 1f;
+                        if (cell != null) dirCoeff = cell.RectTransform.pivot.x > 0 ? -1f : 1f;
+                        SetupCell(cell, index, new Vector2(contentWidth * dirCoeff, (dataList[index].cellSize.y + spacing.y) * -j + -(padding.top - padding.bottom)));
                         if (visibleRange.y >= viewportRange.x)
                             cellList[index].transform.SetAsLastSibling();
                         else
@@ -55,15 +73,19 @@ namespace HowTungTung
                 }
                 contentWidth += dataList[i].cellSize.x + spacing.x;
             }
+
+            // Check scroll position
             if (scrollRect.content.sizeDelta.x > viewportInterval)
             {
-                isAtLeft = viewportRange.x + extendVisibleRange + dataList[0].cellSize.x <= dataList[0].cellSize.x;
-                isAtRight = scrollRect.content.sizeDelta.x - viewportRange.y + extendVisibleRange + dataList[dataList.Count - 1].cellSize.x <= dataList[dataList.Count - 1].cellSize.x;
+                this._isAtLeft = viewportRange.x + extendVisibleRange + dataList[0].cellSize.x <= dataList[0].cellSize.x;
+                this._isAtRight = scrollRect.content.sizeDelta.x - viewportRange.y + extendVisibleRange + dataList[dataList.Count - 1].cellSize.x <= dataList[dataList.Count - 1].cellSize.x;
             }
             else
             {
-                isAtLeft = true;
-                isAtRight = true;
+                this._isAtTop = false;
+                this._isAtBottom = false;
+                this._isAtLeft = true;
+                this._isAtRight = true;
             }
         }
 
@@ -126,7 +148,8 @@ namespace HowTungTung
 
             if (scrollRect.content.anchoredPosition.x != width)
             {
-                DoSnapping(new Vector2(-width, 0), duration);
+                // Check content direction pivot
+                DoSnapping(new Vector2(width * this._contentDirCoeff, 0), duration);
             }
         }
     }

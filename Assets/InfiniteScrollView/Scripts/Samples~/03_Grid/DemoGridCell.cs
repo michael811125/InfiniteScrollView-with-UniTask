@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DemoVerticalGridCell : InfiniteCell
+public class DemoGridCell : InfiniteCell
 {
     public Text text;
 

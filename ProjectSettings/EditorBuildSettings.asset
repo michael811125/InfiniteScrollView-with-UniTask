@@ -6,13 +6,13 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/InfiniteScrollView/Scripts/Samples/01_Vertical/01_Vertical.unity
+    path: Assets/InfiniteScrollView/Scripts/Samples/01_Vertical/Normal/01_Vertical_Normal.unity
     guid: 137ef94c54e884ac2a52dba9c25b1727
   - enabled: 0
-    path: Assets/InfiniteScrollView/Scripts/Samples/02_Horizontal/02_Horizontal.unity
+    path: Assets/InfiniteScrollView/Scripts/Samples/02_Horizontal/Normal/02_Horizontal_Normal.unity
     guid: 43fe84221ef434ce0bfe332f2a97b2ee
   - enabled: 0
-    path: Assets/InfiniteScrollView/Scripts/Samples/03_Grid/03_Grid.unity
+    path: Assets/InfiniteScrollView/Scripts/Samples/03_Grid/Vertical/Normal/03_Grid_V_Normal.unity
     guid: a8275f11ed18746fc8bb2834fff0e898
   - enabled: 0
     path: Assets/InfiniteScrollView/Scripts/Samples/04_TabPage/04_TabPage.unity
