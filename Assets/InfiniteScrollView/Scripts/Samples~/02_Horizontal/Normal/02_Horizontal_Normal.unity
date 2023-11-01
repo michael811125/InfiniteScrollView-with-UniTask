@@ -210,7 +210,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Horizontal Reverse Conditions:
+  m_Text: 'Horizontal Normal Conditions:
 
 
     1. Viewport content pivot (x,
