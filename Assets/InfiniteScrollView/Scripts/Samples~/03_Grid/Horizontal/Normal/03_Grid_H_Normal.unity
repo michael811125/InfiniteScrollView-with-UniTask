@@ -641,11 +641,11 @@ MonoBehaviour:
   m_Text: 'Horizontal Reverse Conditions:
 
 
-    1. Viewport content pivot are (x,
+    1. Viewport content pivot (x,
     y) = (0, 1)  and align [Stretch-Left].
 
 
-    2. Cell pivot are (x, y) = (0, 1)
+    2. Cell pivot (x, y) = (0, 1)
     and align [Left-Top].'
 --- !u!222 &1721184657
 CanvasRenderer:
