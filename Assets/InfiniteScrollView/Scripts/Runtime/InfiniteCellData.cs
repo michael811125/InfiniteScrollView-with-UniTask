@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace HowTungTung
 {
-    public class InfiniteCellData
+    public class InfiniteCellData : IDisposable
     {
         public int index { get; internal set; }
         public Vector2 cellSize;
@@ -22,6 +23,11 @@ namespace HowTungTung
         {
             this.cellSize = cellSize;
             this.data = data;
+        }
+
+        public void Dispose()
+        {
+            this.data = null;
         }
     }
 }

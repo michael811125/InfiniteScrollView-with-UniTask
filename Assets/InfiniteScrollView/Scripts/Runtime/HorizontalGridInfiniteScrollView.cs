@@ -66,9 +66,9 @@ namespace HowTungTung
                         if (cell != null) dirCoeff = cell.RectTransform.pivot.x > 0 ? -1f : 1f;
                         SetupCell(cell, index, new Vector2(contentWidth * dirCoeff, (dataList[index].cellSize.y + spacing.y) * -j + -(padding.top - padding.bottom)));
                         if (visibleRange.y >= viewportRange.x)
-                            cellList[index].transform.SetAsLastSibling();
+                            cellList[index]?.transform.SetAsLastSibling();
                         else
-                            cellList[index].transform.SetAsFirstSibling();
+                            cellList[index]?.transform.SetAsFirstSibling();
                     }
                 }
                 contentWidth += dataList[i].cellSize.x + spacing.x;

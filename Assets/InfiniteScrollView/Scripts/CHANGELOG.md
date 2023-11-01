@@ -1,5 +1,10 @@
 ## CHANGELOG
 
+## [1.3.1] - 2023-11-01
+- Fixed determines.
+- Modified Samples.
+- Optimzied Recycle and SetupCell procedure.
+
 ## [1.3.0] - 2023-10-31
 - Modified All infiniteScrollViews can auto calculate direction by content and cell pivot.
 - Modified Samples (Normal direction and Reverse direction).

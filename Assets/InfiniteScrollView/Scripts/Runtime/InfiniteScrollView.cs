@@ -190,6 +190,7 @@ namespace HowTungTung
                 index < 0)
                 return;
 
+            dataList[index].Dispose();
             dataList.RemoveAt(index);
             this.RefreshCellDataIndex(index);
             RecycleCell(index);
@@ -351,13 +352,14 @@ namespace HowTungTung
 
         protected void SetupCell(InfiniteCell cell, int index, Vector2 pos)
         {
-            if (cell == null) return;
-
-            cell.gameObject.SetActive(true);
-            cell.CellData = dataList[index];
-            cell.RectTransform.anchoredPosition = pos;
-            cellList[index] = cell;
-            cell.onSelected += OnCellSelected;
+            if (cell != null)
+            {
+                cellList[index] = cell;
+                cell.CellData = dataList[index];
+                cell.RectTransform.anchoredPosition = pos;
+                cell.onSelected += OnCellSelected;
+                cell.gameObject.SetActive(true);
+            }
         }
 
         protected void RecycleCell(int index)
@@ -366,10 +368,10 @@ namespace HowTungTung
             {
                 var cell = cellList[index];
                 cellList[index] = null;
-                _cellPool.Enqueue(cell);
+                cell.onSelected -= OnCellSelected;
                 cell.gameObject.SetActive(false);
                 cell.OnRecycle();
-                cell.onSelected -= OnCellSelected;
+                _cellPool.Enqueue(cell);
             }
         }
 
@@ -388,6 +390,10 @@ namespace HowTungTung
                 await InitializePool();
             scrollRect.velocity = Vector2.zero;
             scrollRect.content.anchoredPosition = Vector2.zero;
+            for (int i = 0; i < dataList.Count; i++)
+            {
+                dataList[i].Dispose();
+            }
             dataList.Clear();
             for (int i = 0; i < cellList.Count; i++)
             {

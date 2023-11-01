@@ -299,7 +299,7 @@ PrefabInstance:
     - target: {fileID: 7911875008147736594, guid: 421612e6beac0d541a07ea5d97bb7677,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 0.00079345703
       objectReference: {fileID: 0}
     - target: {fileID: 7911875008147736594, guid: 421612e6beac0d541a07ea5d97bb7677,
         type: 3}
@@ -518,7 +518,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -30, y: -30}
-  m_SizeDelta: {x: 288.41003, y: 0}
+  m_SizeDelta: {x: 290, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &2039907101
 MonoBehaviour:
@@ -570,12 +570,12 @@ MonoBehaviour:
   m_Text: 'Horizontal Reverse Conditions:
 
 
-    1. Viewport content pivot (x,
-    y) = (1, 1)  and align [Stretch-Right].
+    1. Viewport content pivot (x, y)
+    = (1, 1)  and align [Stretch-Right].
 
 
-    2. Cell pivot (x, y) = (1,
-    1) and align [Right-Top].'
+    2. Cell pivot (x, y) = (1, 1) and
+    align [Right-Top].'
 --- !u!222 &2039907103
 CanvasRenderer:
   m_ObjectHideFlags: 0

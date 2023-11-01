@@ -534,7 +534,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 30, y: 30}
-  m_SizeDelta: {x: 288.41, y: 0}
+  m_SizeDelta: {x: 290, y: 0}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &2100359777
 MonoBehaviour:
@@ -586,12 +586,12 @@ MonoBehaviour:
   m_Text: 'Vertical Reverse Conditions:
 
 
-    1. Viewport content pivot (x,
-    y) = (0, 0)  and align [Stretch-Bottom].
+    1. Viewport content pivot (x, y) =
+    (0, 0)  and align [Stretch-Bottom].
 
 
-    2. Cell pivot (x, y) = (0,
-    0) and align [Left-Bottom].'
+    2. Cell pivot (x, y) = (0, 0) and align
+    [Left-Bottom].'
 --- !u!222 &2100359779
 CanvasRenderer:
   m_ObjectHideFlags: 0

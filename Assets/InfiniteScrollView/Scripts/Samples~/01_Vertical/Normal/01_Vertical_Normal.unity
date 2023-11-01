@@ -374,7 +374,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 30, y: 30}
-  m_SizeDelta: {x: 288.41, y: 0}
+  m_SizeDelta: {x: 290, y: 0}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &2096381313
 MonoBehaviour:
@@ -426,12 +426,11 @@ MonoBehaviour:
   m_Text: 'Vertical Normal Conditions:
 
 
-    1. Viewport content pivot (x,
-    y) = (0, 1)  and align [Stretch-Top].
+    1. Viewport content pivot (x, y) = (0,
+    1)  and align [Stretch-Top].
 
 
-    2. Cell pivot (x, y) = (0, 1)
-    and align [Left-Top].'
+    2. Cell pivot (x, y) = (0, 1) and align [Left-Top].'
 --- !u!222 &2096381315
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -575,7 +574,7 @@ PrefabInstance:
     - target: {fileID: 1855459386986698912, guid: a17a812836c754f11a7ba8e246512cd8,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 0.00067811005
       objectReference: {fileID: 0}
     - target: {fileID: 1855459387362808913, guid: a17a812836c754f11a7ba8e246512cd8,
         type: 3}

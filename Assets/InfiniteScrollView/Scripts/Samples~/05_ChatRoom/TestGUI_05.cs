@@ -8,6 +8,7 @@ public class TestGUI_05 : MonoBehaviour
     public InfiniteScrollView chatScrollView;
     public Text heightInstrument;
     public float baseCellHeight = 20;
+    public InputField inputField;
     public string myName = "HowTungTung";
     private string speaker = "Tester";
     private string message = "In a recent blog post we introduced the concept of Scriptable Render Pipelines. In short, SRP allow developers to control how Unity renders a frame in C#. We will release two built-in render pipelines with Unity 2018.1: the Lightweight Pipeline and HD Pipeline. In this article we’re going to focus on the Lightweight Pipeline or LWRP.";
@@ -34,6 +35,9 @@ public class TestGUI_05 : MonoBehaviour
     public void OnSubmit(string input)
     {
         AddChatData(new ChatCellData(myName, input, true));
+        this.inputField.text = string.Empty;
+        this.inputField.ActivateInputField();
+        this.inputField.Select();
     }
 
     private void AddChatData(ChatCellData chatCellData)

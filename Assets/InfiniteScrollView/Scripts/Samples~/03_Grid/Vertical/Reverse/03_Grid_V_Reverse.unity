@@ -212,12 +212,12 @@ MonoBehaviour:
   m_Text: 'Vertical Reverse Conditions:
 
 
-    1. Viewport content pivot (x,
-    y) = (0, 0)  and align [Stretch-Bottom].
+    1. Viewport content pivot (x, y) =
+    (0, 0)  and align [Stretch-Bottom].
 
 
-    2. Cell pivot (x, y) = (0,
-    0) and align [Left-Bottom].'
+    2. Cell pivot (x, y) = (0, 0) and align
+    [Left-Bottom].'
 --- !u!222 &405701624
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -241,6 +241,11 @@ PrefabInstance:
     - target: {fileID: 4465912299598443116, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4465912299598443116, guid: c289b39ffe932df4aaada93055e1bcea,
+        type: 3}
+      propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4465912300404621520, guid: c289b39ffe932df4aaada93055e1bcea,
@@ -271,7 +276,7 @@ PrefabInstance:
     - target: {fileID: 4465912300404621521, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4465912300404621521, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
@@ -281,17 +286,17 @@ PrefabInstance:
     - target: {fileID: 4465912300404621521, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4465912300404621521, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 400
+      value: 430
       objectReference: {fileID: 0}
     - target: {fileID: 4465912300404621521, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 830
       objectReference: {fileID: 0}
     - target: {fileID: 4465912300404621521, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
@@ -331,7 +336,7 @@ PrefabInstance:
     - target: {fileID: 4465912300404621521, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -200
+      value: -215
       objectReference: {fileID: 0}
     - target: {fileID: 4465912300404621521, guid: c289b39ffe932df4aaada93055e1bcea,
         type: 3}
