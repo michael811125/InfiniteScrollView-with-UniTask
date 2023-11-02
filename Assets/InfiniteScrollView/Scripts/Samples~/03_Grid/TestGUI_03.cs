@@ -1,5 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
-using HowTungTung;
+using InfiniteScrollViews;
 using UnityEngine;
 
 public class TestGUI_03 : MonoBehaviour
@@ -29,7 +29,7 @@ public class TestGUI_03 : MonoBehaviour
         {
             for (int i = 0; i < 1000; i++)
             {
-                infiniteScrollView.Add(new InfiniteCellData(new Vector2(100, 100))).Forget();
+                infiniteScrollView.Add(new InfiniteCellData(new Vector2(100, 100)));
             }
             infiniteScrollView.Refresh();
         }
@@ -37,7 +37,7 @@ public class TestGUI_03 : MonoBehaviour
         if (GUILayout.Button("Add"))
         {
             var data = new InfiniteCellData(new Vector2(100, 100));
-            infiniteScrollView.Add(data).Forget();
+            infiniteScrollView.Add(data);
             infiniteScrollView.Refresh();
             infiniteScrollView.SnapLast(0.1f);
         }
@@ -48,7 +48,7 @@ public class TestGUI_03 : MonoBehaviour
         removeIndex = GUILayout.TextField(removeIndex);
         if (GUILayout.Button("Remove"))
         {
-            infiniteScrollView.Remove(int.Parse(removeIndex)).Forget();
+            infiniteScrollView.Remove(int.Parse(removeIndex));
         }
         #endregion
 

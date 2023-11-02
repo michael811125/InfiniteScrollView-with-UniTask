@@ -1,5 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
-using HowTungTung;
+using InfiniteScrollViews;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -24,7 +24,7 @@ public class DemoTabPageScrollView : MonoBehaviour, IBeginDragHandler, IEndDragH
     {
         foreach (var data in pageContents)
         {
-            scrollView.Add(new InfiniteCellData(eachContentSize, new DemoTabPageData { content = data })).Forget();
+            scrollView.Add(new InfiniteCellData(eachContentSize, new DemoTabPageData { content = data }));
         }
         scrollView.Refresh();
     }

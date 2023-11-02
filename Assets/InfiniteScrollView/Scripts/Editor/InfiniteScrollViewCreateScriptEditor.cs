@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace HowTungTung.Editor
+namespace InfiniteScrollViews.Editor
 {
     public static class InfiniteScrollViewCreateScriptEditor
     {

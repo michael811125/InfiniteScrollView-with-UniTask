@@ -1,5 +1,54 @@
 ## CHANGELOG
 
+## [1.4.0] - 2023-11-03 (Breaking Changes)
+- Modified namespace HowTungTung to InfiniteScrollViews.
+- Modified RefreshCellVisibility access modifier to protected.
+```C#
+    protected abstract void RefreshCellVisibility();
+```
+- Modified Add, Insert, Remove, Refresh, Clear methods (Removed async behaviour, won't auto InitializePool).
+- Added RefreshCellVisibilityWithCheck method in InfiniteScrollView.
+```C#
+    public void RefreshCellVisibilityWithCheck()
+```
+- Added visibleCount param in InfiniteScrollView.
+```C#
+    public int visibleCount { get; protected set; }
+```
+- Added lastMaxVisibleCount param in InfiniteScrollView.
+```C#
+    public int lastMaxVisibleCount { get; protected set; }
+```
+- Added isVisibleRangeFilled param in InfiniteScrollView.
+```C#
+    public bool isVisibleRangeFilled { get; protected set; }
+```
+- Added DataCount() method in InfiniteScrollView.
+```C#
+    public int DataCount()
+```
+- Added param for Refresh(bool disabledRefreshCells = false) method of InfiniteScrollView.
+```C#
+    /// <summary>
+    /// Refresh scrollView (doesn't need to await, if scrollView already initialized)
+    /// </summary>
+    /// <param name="disabledRefreshCells">Disable refresh cells, when disabled will mark flag to refresh all at next scrolling.</param>
+    /// <returns></returns>
+    public abstract UniTask Refresh(bool disabledRefreshCells = false)
+```
+- Optimized code.
+
+※Note: If you add data and don't want to refresh cells every times. You can determines infiniteScrollView.isVisibleRangeFilled == true and set disabledRefreshCells = true, will help you to mark flag and refresh once all at next scrolling.
+```C#
+	public void AddCellData() 
+	{
+        var data = new InfiniteCellData(new Vector2(100, 100));
+        infiniteScrollView.Add(data);
+		if(!infiniteScrollView.isVisibleRangeFilled) infiniteScrollView.Refresh();
+        else infiniteScrollView.Refresh(true);
+	}
+```
+
 ## [1.3.1] - 2023-11-01
 - Fixed determines.
 - Modified Samples.

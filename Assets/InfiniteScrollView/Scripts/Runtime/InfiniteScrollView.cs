@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace HowTungTung
+namespace InfiniteScrollViews
 {
     [RequireComponent(typeof(ScrollRect))]
     public abstract class InfiniteScrollView : UIBehaviour
@@ -43,11 +43,17 @@ namespace HowTungTung
         [Header("------ Cell View Options ------")]
         public float extendVisibleRange;
         [HideInInspector] public ScrollRect scrollRect;
-        public List<InfiniteCellData> dataList = new List<InfiniteCellData>();
-        [HideInInspector] public List<InfiniteCell> cellList = new List<InfiniteCell>();
+        protected List<InfiniteCellData> _dataList = new List<InfiniteCellData>();
+        protected List<InfiniteCell> _cellList = new List<InfiniteCell>();
         protected Queue<InfiniteCell> _cellPool = new Queue<InfiniteCell>();
         public SnapAlign snapAlign = SnapAlign.Start;
         public Padding padding;
+
+        // Visible info
+        protected bool _disabledRefreshCells = false;
+        public int visibleCount { get; protected set; } = 0;
+        public int lastMaxVisibleCount { get; protected set; } = 0;
+        public bool isVisibleRangeFilled { get; protected set; } = false;
 
         // Direction pivot 
         protected float _contentDirCoeff = 0;
@@ -67,7 +73,7 @@ namespace HowTungTung
         // Task cancellation
         private CancellationTokenSource _cts;
 
-        public bool IsInitialized
+        public bool isInitialized
         {
             get;
             protected set;
@@ -82,12 +88,21 @@ namespace HowTungTung
         }
 
         /// <summary>
+        /// Get data count (Equals to cell count)
+        /// </summary>
+        /// <returns></returns>
+        public int DataCount()
+        {
+            return this._dataList.Count;
+        }
+
+        /// <summary>
         /// Init infinite-cell of scrollView
         /// </summary>
         /// <returns></returns>
         public virtual async UniTask InitializePool(object args = null)
         {
-            if (IsInitialized)
+            if (isInitialized)
                 return;
 
             if (scrollRect == null) scrollRect = this.GetComponent<ScrollRect>();
@@ -100,8 +115,8 @@ namespace HowTungTung
                 Destroy(trans.gameObject);
             }
 
-            dataList.Clear();
-            cellList.Clear();
+            _dataList.Clear();
+            _cellList.Clear();
             _cellPool.Clear();
 
             for (int i = 0; i < cellPoolSize; i++)
@@ -111,91 +126,117 @@ namespace HowTungTung
                 newCell.gameObject.SetActive(false);
                 _cellPool.Enqueue(newCell);
             }
-            IsInitialized = true;
+            isInitialized = true;
         }
 
         protected void OnValueChanged(Vector2 normalizedPosition)
         {
-            this.RefreshCellVisibility();
+            // If ever set to false, must refresh all once
+            if (this._disabledRefreshCells)
+            {
+                this._disabledRefreshCells = false;
+                this.Refresh();
+            }
+            else this.RefreshCellVisibilityWithCheck();
+
+            // Invoke callback
             this.onValueChanged?.Invoke(normalizedPosition);
+        }
+
+        public void RefreshCellVisibilityWithCheck()
+        {
+            if (!this.IsInitialized()) return;
+            this.RefreshCellVisibility();
         }
 
         /// <summary>
         /// Refresh visible cells
         /// </summary>
-        public abstract void RefreshCellVisibility();
+        protected abstract void RefreshCellVisibility();
 
         /// <summary>
         /// Refresh scrollView (doesn't need to await, if scrollView already initialized)
         /// </summary>
+        /// <param name="disabledRefreshCells">Disable refresh cells, when disabled will mark flag to refresh all at next scrolling.</param>
         /// <returns></returns>
-        public abstract UniTask Refresh();
+        public abstract void Refresh(bool disabledRefreshCells = false);
+
+        protected abstract void DoRefresh(bool disabledRefreshCells);
+
+        protected abstract UniTask DelayToRefresh(bool disabledRefreshCells);
+
+        protected abstract void RefreshAndCheckVisibleInfo();
+
+        protected bool IsInitialized()
+        {
+            if (!this.isInitialized)
+            {
+                Debug.Log("<color=#ff0073>[InfiniteScrollView] Please InitializePool first!!!</color>");
+                return false;
+            }
+            return true;
+        }
 
         /// <summary>
-        /// Add cell data (doesn't need to await, if scrollView already initialized)
+        /// Add cell data
         /// </summary>
         /// <param name="data"></param>
         /// <param name="autoRefresh"></param>
         /// <returns></returns>
-        public virtual async UniTask Add(InfiniteCellData data, bool autoRefresh = false)
+        public virtual void Add(InfiniteCellData data, bool autoRefresh = false)
         {
-            if (!IsInitialized)
-            {
-                await InitializePool();
-            }
+            if (!this.IsInitialized()) return;
 
-            dataList.Add(data);
-            cellList.Add(null);
-            this.RefreshCellDataIndex(dataList.Count - 1);
-            if (autoRefresh) await Refresh();
+            _dataList.Add(data);
+            _cellList.Add(null);
+            this.RefreshCellDataIndex(_dataList.Count - 1);
+            if (autoRefresh) this.Refresh();
+            this.RefreshAndCheckVisibleInfo();
         }
 
         /// <summary>
-        /// Insert cell data (doesn't need to await, if scrollView already initialized)
+        /// Insert cell data
         /// </summary>
         /// <param name="index"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public virtual async UniTask Insert(int index, InfiniteCellData data)
+        public virtual bool Insert(int index, InfiniteCellData data)
         {
-            if (!IsInitialized)
-            {
-                await InitializePool();
-            }
+            if (!this.IsInitialized()) return false;
 
             // Insert including max count
-            if (index > dataList.Count ||
+            if (index > _dataList.Count ||
                 index < 0)
-                return;
+                return false;
 
-            dataList.Insert(index, data);
-            cellList.Insert(index, null);
+            _dataList.Insert(index, data);
+            _cellList.Insert(index, null);
             this.RefreshCellDataIndex(index);
+            return true;
         }
 
         /// <summary>
-        /// Remove cell data (doesn't need to await, if scrollView already initialized)
+        /// Remove cell data
         /// </summary>
         /// <param name="index"></param>
         /// <param name="autoRefresh"></param>
         /// <returns></returns>
-        public virtual async UniTask Remove(int index, bool autoRefresh = true)
+        public virtual bool Remove(int index, bool autoRefresh = true)
         {
-            if (!IsInitialized)
-            {
-                await InitializePool();
-            }
+            if (!this.IsInitialized()) return false;
 
-            if (index >= dataList.Count ||
+            if (index >= _dataList.Count ||
                 index < 0)
-                return;
+                return false;
 
-            dataList[index].Dispose();
-            dataList.RemoveAt(index);
+            this._dataList[index].Dispose();
+            this._dataList.RemoveAt(index);
             this.RefreshCellDataIndex(index);
             RecycleCell(index);
-            cellList.RemoveAt(index);
-            if (autoRefresh) await Refresh();
+            _cellList.RemoveAt(index);
+            if (autoRefresh) this.Refresh();
+            this.RefreshAndCheckVisibleInfo();
+            return true;
         }
 
         /// <summary>
@@ -297,7 +338,7 @@ namespace HowTungTung
         /// <param name="duration"></param>
         public void SnapLast(float duration)
         {
-            Snap(dataList.Count - 1, duration);
+            Snap(_dataList.Count - 1, duration);
         }
 
         protected void DoSnapping(Vector2 target, float duration)
@@ -325,7 +366,12 @@ namespace HowTungTung
             if (duration <= 0)
             {
                 scrollRect.content.anchoredPosition = target;
-                this.RefreshCellVisibility();
+                if (this._disabledRefreshCells)
+                {
+                    this._disabledRefreshCells = false;
+                    this.Refresh();
+                }
+                else this.RefreshCellVisibilityWithCheck();
             }
             else
             {
@@ -342,6 +388,10 @@ namespace HowTungTung
                     }
                     await UniTask.Yield(PlayerLoopTiming.Update, this._cts.Token);
                 }
+
+                /**
+                 * When scrolling, OnValueChanged will be called
+                 */
             }
 
             // After snap end to release cts
@@ -354,8 +404,8 @@ namespace HowTungTung
         {
             if (cell != null)
             {
-                cellList[index] = cell;
-                cell.CellData = dataList[index];
+                _cellList[index] = cell;
+                cell.CellData = _dataList[index];
                 cell.RectTransform.anchoredPosition = pos;
                 cell.onSelected += OnCellSelected;
                 cell.gameObject.SetActive(true);
@@ -364,10 +414,10 @@ namespace HowTungTung
 
         protected void RecycleCell(int index)
         {
-            if (cellList[index] != null)
+            if (_cellList[index] != null)
             {
-                var cell = cellList[index];
-                cellList[index] = null;
+                var cell = _cellList[index];
+                _cellList[index] = null;
                 cell.onSelected -= OnCellSelected;
                 cell.gameObject.SetActive(false);
                 cell.OnRecycle();
@@ -384,23 +434,23 @@ namespace HowTungTung
         /// Clear cell data (doesn't need to await, if scrollView already initialized)
         /// </summary>
         /// <returns></returns>
-        public virtual async UniTask Clear()
+        public virtual void Clear()
         {
-            if (IsInitialized == false)
-                await InitializePool();
+            if (!this.IsInitialized()) return;
+
             scrollRect.velocity = Vector2.zero;
             scrollRect.content.anchoredPosition = Vector2.zero;
-            for (int i = 0; i < dataList.Count; i++)
+            for (int i = 0; i < _dataList.Count; i++)
             {
-                dataList[i].Dispose();
+                _dataList[i].Dispose();
             }
-            dataList.Clear();
-            for (int i = 0; i < cellList.Count; i++)
+            _dataList.Clear();
+            for (int i = 0; i < _cellList.Count; i++)
             {
                 RecycleCell(i);
             }
-            cellList.Clear();
-            await Refresh();
+            _cellList.Clear();
+            this.Refresh();
         }
 
         protected override void OnRectTransformDimensionsChange()
@@ -415,9 +465,9 @@ namespace HowTungTung
         private void RefreshCellDataIndex(int beginIndex)
         {
             // Optimized refresh efficiency
-            for (int i = beginIndex; i < dataList.Count; i++)
+            for (int i = beginIndex; i < _dataList.Count; i++)
             {
-                dataList[i].index = i;
+                _dataList[i].index = i;
             }
         }
 

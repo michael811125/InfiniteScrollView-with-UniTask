@@ -2,7 +2,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 
-namespace HowTungTung
+namespace InfiniteScrollViews
 {
     public class InfiniteCell : MonoBehaviour
     {

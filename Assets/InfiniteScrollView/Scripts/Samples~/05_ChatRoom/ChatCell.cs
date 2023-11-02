@@ -1,4 +1,4 @@
-﻿using HowTungTung;
+﻿using InfiniteScrollViews;
 using UnityEngine;
 using UnityEngine.UI;
 

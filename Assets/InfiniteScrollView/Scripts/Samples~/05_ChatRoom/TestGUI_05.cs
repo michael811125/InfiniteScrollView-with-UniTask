@@ -1,5 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
-using HowTungTung;
+using InfiniteScrollViews;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +9,7 @@ public class TestGUI_05 : MonoBehaviour
     public Text heightInstrument;
     public float baseCellHeight = 20;
     public InputField inputField;
-    public string myName = "HowTungTung";
+    public string myName = "InfiniteScrollViews";
     private string speaker = "Tester";
     private string message = "In a recent blog post we introduced the concept of Scriptable Render Pipelines. In short, SRP allow developers to control how Unity renders a frame in C#. We will release two built-in render pipelines with Unity 2018.1: the Lightweight Pipeline and HD Pipeline. In this article we’re going to focus on the Lightweight Pipeline or LWRP.";
 
@@ -34,18 +34,28 @@ public class TestGUI_05 : MonoBehaviour
 
     public void OnSubmit(string input)
     {
-        AddChatData(new ChatCellData(myName, input, true));
+        AddChatDataAndSubmit(new ChatCellData(myName, input, true));
         this.inputField.text = string.Empty;
         this.inputField.ActivateInputField();
         this.inputField.Select();
     }
 
-    private void AddChatData(ChatCellData chatCellData)
+    private void AddChatDataAndSubmit(ChatCellData chatCellData)
     {
         heightInstrument.text = chatCellData.message;
         var infiniteData = new InfiniteCellData(new Vector2(0, heightInstrument.preferredHeight + baseCellHeight), chatCellData);
-        chatScrollView.Add(infiniteData).Forget();
+        chatScrollView.Add(infiniteData);
         chatScrollView.Refresh();
         chatScrollView.SnapLast(0.1f);
+    }
+
+    private void AddChatData(ChatCellData chatCellData)
+    {
+        heightInstrument.text = chatCellData.message;
+        var chatMessageHeight = heightInstrument.preferredHeight + baseCellHeight;
+        var infiniteData = new InfiniteCellData(new Vector2(0, chatMessageHeight), chatCellData);
+        chatScrollView.Add(infiniteData);
+        if (!chatScrollView.isVisibleRangeFilled) chatScrollView.Refresh();
+        else chatScrollView.Refresh(true);
     }
 }

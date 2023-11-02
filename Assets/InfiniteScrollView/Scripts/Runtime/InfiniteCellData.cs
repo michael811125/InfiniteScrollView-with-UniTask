@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace HowTungTung
+namespace InfiniteScrollViews
 {
     public class InfiniteCellData : IDisposable
     {

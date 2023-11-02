@@ -1167,7 +1167,6 @@ MonoBehaviour:
   cellPrefab: {fileID: 825949440, guid: 27fc55d2dd9f245419dad5b69ec8e99f, type: 3}
   extendVisibleRange: 0
   scrollRect: {fileID: 0}
-  cellList: []
   snapAlign: 1
   padding:
     top: 0
