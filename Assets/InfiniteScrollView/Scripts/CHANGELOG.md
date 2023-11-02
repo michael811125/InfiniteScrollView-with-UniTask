@@ -40,13 +40,13 @@
 
 ※Note: If you add data and don't want to refresh cells every times. You can determines infiniteScrollView.isVisibleRangeFilled == true and set disabledRefreshCells = true, will help you to mark flag and refresh once all at next scrolling.
 ```C#
-	public void AddCellData() 
-	{
+    public void AddCellData() 
+    {
         var data = new InfiniteCellData(new Vector2(100, 100));
         infiniteScrollView.Add(data);
-		if(!infiniteScrollView.isVisibleRangeFilled) infiniteScrollView.Refresh();
+        if(!infiniteScrollView.isVisibleRangeFilled) infiniteScrollView.Refresh();
         else infiniteScrollView.Refresh(true);
-	}
+    }
 ```
 
 ## [1.3.1] - 2023-11-01
