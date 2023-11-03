@@ -74,7 +74,7 @@ namespace InfiniteScrollViews
             }
         }
 
-        public sealed override void Refresh(bool disabledRefreshCells = true)
+        public sealed override void Refresh(bool disabledRefreshCells = false)
         {
             if (!IsInitialized()) return;
 

@@ -1,5 +1,13 @@
 ## CHANGELOG
 
+## [1.4.1] - 2023-11-03
+- Fixed Refresh method default value bug issue (disabledRefreshCells = false).
+- Added SnapFirst and SnapMiddle in InfiniteScrollView.
+```C#
+    public void SnapFirst(float duration)
+    public void SnapMiddle(float duration)
+```
+
 ## [1.4.0] - 2023-11-03 (Breaking Changes)
 - Modified namespace HowTungTung to InfiniteScrollViews.
 - Modified RefreshCellVisibility access modifier to protected.

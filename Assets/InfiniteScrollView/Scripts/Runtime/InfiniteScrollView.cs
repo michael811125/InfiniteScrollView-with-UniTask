@@ -333,6 +333,24 @@ namespace InfiniteScrollViews
         public abstract void Snap(int index, float duration);
 
         /// <summary>
+        /// Move to first cell
+        /// </summary>
+        /// <param name="duration"></param>
+        public void SnapFirst(float duration)
+        {
+            Snap(0, duration);
+        }
+
+        /// <summary>
+        /// Move to middle cell
+        /// </summary>
+        /// <param name="duration"></param>
+        public void SnapMiddle(float duration)
+        {
+            Snap((_dataList.Count - 1) >> 1, duration);
+        }
+
+        /// <summary>
         /// Move to last cell
         /// </summary>
         /// <param name="duration"></param>
