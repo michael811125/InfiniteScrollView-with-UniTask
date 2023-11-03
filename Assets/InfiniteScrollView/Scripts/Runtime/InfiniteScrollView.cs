@@ -155,7 +155,7 @@ namespace InfiniteScrollViews
         protected abstract void RefreshCellVisibility();
 
         /// <summary>
-        /// Refresh scrollView (doesn't need to await, if scrollView already initialized)
+        /// Refresh scrollView
         /// </summary>
         /// <param name="disabledRefreshCells">Disable refresh cells, when disabled will mark flag to refresh all at next scrolling.</param>
         /// <returns></returns>
@@ -449,7 +449,7 @@ namespace InfiniteScrollViews
         }
 
         /// <summary>
-        /// Clear cell data (doesn't need to await, if scrollView already initialized)
+        /// Clear cell data
         /// </summary>
         /// <returns></returns>
         public virtual void Clear()
