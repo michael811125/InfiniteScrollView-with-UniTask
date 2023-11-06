@@ -66,9 +66,9 @@ namespace InfiniteScrollViews
 
         // Callbacks
         public Action<Vector2> onValueChanged;
-        public event Action onRectTransformDimensionsChanged;
-        public event Action<InfiniteCell> onCellSelected;
+        public Action onRectTransformDimensionsChanged;
         public Action onRefreshed;
+        public event Action<InfiniteCell> onCellSelected;
 
         // Task cancellation
         private CancellationTokenSource _cts;
