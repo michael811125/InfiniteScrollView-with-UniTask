@@ -6,30 +6,30 @@ namespace InfiniteScrollViews
 {
     public class InfiniteCell : MonoBehaviour
     {
-        public event Action<InfiniteCell> onSelected;
+        internal event Action<InfiniteCell> onSelected;
 
-        private RectTransform rectTransform;
+        private RectTransform _rectTransform;
         public RectTransform RectTransform
         {
             get
             {
-                if (rectTransform == null)
-                    rectTransform = transform as RectTransform;
-                return rectTransform;
+                if (_rectTransform == null)
+                    this._rectTransform = transform as RectTransform;
+                return this._rectTransform;
             }
         }
 
-        private InfiniteCellData cellData;
+        private InfiniteCellData _cellData;
         public InfiniteCellData CellData
         {
             set
             {
-                cellData = value;
-                OnRefresh();
+                this._cellData = value;
+                this.OnRefresh();
             }
             get
             {
-                return cellData;
+                return this._cellData;
             }
         }
 
@@ -39,18 +39,19 @@ namespace InfiniteScrollViews
 
         public virtual void OnRecycle() { }
 
+        public virtual void OnSnap() { }
+
         /// <summary>
         /// Button event
         /// </summary>
-        public void OnClick()
+        public virtual void OnClick()
         {
             this.InvokeSelected();
         }
 
         protected void InvokeSelected()
         {
-            if (onSelected != null)
-                onSelected.Invoke(this);
+            this.onSelected?.Invoke(this);
         }
     }
 }

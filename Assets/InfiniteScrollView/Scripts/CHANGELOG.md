@@ -1,5 +1,15 @@
 ## CHANGELOG
 
+## [1.5.1] - 2023-11-08
+- Added OnSnap method in InfiniteCell.
+```C#
+    public virtual void OnSnap()
+```
+- Modified OnClick can override in InfiniteCell.
+```C#
+    ublic virtual void OnClick()
+```
+
 ## [1.5.0] - 2023-11-07
 - Added DataOrder.
 ```C#

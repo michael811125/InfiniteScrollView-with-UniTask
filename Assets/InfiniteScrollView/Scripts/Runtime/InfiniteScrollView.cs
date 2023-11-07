@@ -81,7 +81,7 @@ namespace InfiniteScrollViews
         public Action<Vector2> onValueChanged;
         public Action onRectTransformDimensionsChanged;
         public Action onRefreshed;
-        public event Action<InfiniteCell> onCellSelected;
+        public Action<InfiniteCell> onCellSelected;
 
         // Task cancellation
         private CancellationTokenSource _cts;
@@ -221,7 +221,7 @@ namespace InfiniteScrollViews
 
             this._dataList.Add(data);
             this._cellList.Add(null);
-            this.RefreshCellDataIndex(this._dataList.Count - 1);
+            this._RefreshCellDataIndex(this._dataList.Count - 1);
             if (autoRefresh) this.Refresh();
         }
 
@@ -242,7 +242,7 @@ namespace InfiniteScrollViews
 
             this._dataList.Insert(index, data);
             this._cellList.Insert(index, null);
-            this.RefreshCellDataIndex(index);
+            this._RefreshCellDataIndex(index);
             return true;
         }
 
@@ -262,7 +262,7 @@ namespace InfiniteScrollViews
 
             this._dataList[index].Dispose();
             this._dataList.RemoveAt(index);
-            this.RefreshCellDataIndex(index);
+            this._RefreshCellDataIndex(index);
             this.RecycleCell(index);
             this._cellList.RemoveAt(index);
             if (autoRefresh) this.Refresh();
@@ -430,14 +430,14 @@ namespace InfiniteScrollViews
             this.Snap(index, duration);
         }
 
-        protected void DoSnapping(Vector2 target, float duration)
+        protected void DoSnapping(int index, Vector2 target, float duration)
         {
-            this.StopSnapping();
+            this._StopSnapping();
             this._cts = new CancellationTokenSource();
-            this.ProcessSnapping(target, duration).Forget();
+            this._ProcessSnapping(index, target, duration).Forget();
         }
 
-        private void StopSnapping()
+        private void _StopSnapping()
         {
             if (this._cts != null)
             {
@@ -447,7 +447,7 @@ namespace InfiniteScrollViews
             }
         }
 
-        private async UniTask ProcessSnapping(Vector2 target, float duration)
+        private async UniTask _ProcessSnapping(int index, Vector2 target, float duration)
         {
             this.scrollRect.velocity = Vector2.zero;
 
@@ -481,6 +481,11 @@ namespace InfiniteScrollViews
                  * When scrolling, OnValueChanged will be called
                  */
             }
+
+            if (index < 0) index = 0;
+            else if (index >= this._dataList.Count) index = this._dataList.Count - 1;
+            var cell = this._cellList[index];
+            if (cell != null) cell.OnSnap();
 
             // After snap end to release cts
             this._cts.Cancel();
@@ -542,7 +547,7 @@ namespace InfiniteScrollViews
                 this._cellList[index] = cell;
                 cell.CellData = this._dataList[index];
                 cell.RectTransform.anchoredPosition = pos;
-                cell.onSelected += this.OnCellSelected;
+                cell.onSelected += this._OnCellSelected;
                 cell.gameObject.SetActive(true);
             }
         }
@@ -553,19 +558,19 @@ namespace InfiniteScrollViews
             {
                 var cell = this._cellList[index];
                 this._cellList[index] = null;
-                cell.onSelected -= this.OnCellSelected;
+                cell.onSelected -= this._OnCellSelected;
                 cell.gameObject.SetActive(false);
                 cell.OnRecycle();
                 this._cellPool.Enqueue(cell);
             }
         }
 
-        private void OnCellSelected(InfiniteCell selectedCell)
+        private void _OnCellSelected(InfiniteCell selectedCell)
         {
             this.onCellSelected?.Invoke(selectedCell);
         }
 
-        private void RefreshCellDataIndex(int beginIndex)
+        private void _RefreshCellDataIndex(int beginIndex)
         {
             // Optimized refresh efficiency
             for (int i = beginIndex; i < this._dataList.Count; i++)

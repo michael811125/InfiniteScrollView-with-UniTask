@@ -155,13 +155,10 @@ namespace InfiniteScrollViews
                 width += this._dataList[i].cellSize.x + this.spacing;
             }
 
-            width = this.CalculateSnapPos(ScrollType.Horizontal, this.snapAlign, width, this._dataList[index]);
-
-            if (this.scrollRect.content.anchoredPosition.x != width)
-            {
-                // Check content direction pivot
-                this.DoSnapping(new Vector2(width * this._contentDirCoeff, 0), duration);
-            }
+            var cellData = this._dataList[index];
+            width = this.CalculateSnapPos(ScrollType.Horizontal, this.snapAlign, width, cellData);
+            // Check content direction pivot
+            this.DoSnapping(index, new Vector2(width * this._contentDirCoeff, 0), duration);
         }
 
         public override bool Remove(int index, bool withRefresh = true)
