@@ -7,7 +7,7 @@
 ```
 - Modified OnClick can override in InfiniteCell.
 ```C#
-    ublic virtual void OnClick()
+    public virtual void OnClick()
 ```
 
 ## [1.5.0] - 2023-11-07
