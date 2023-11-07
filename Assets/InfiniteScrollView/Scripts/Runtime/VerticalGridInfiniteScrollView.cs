@@ -8,77 +8,160 @@ namespace InfiniteScrollViews
         public Vector2 spacing;
         public int columeCount = 1;
 
-        protected override void RefreshCellVisibility()
+        #region Override
+        protected override void DoRefreshVisibleCells()
         {
-            if (columeCount <= 0)
+            if (this.columeCount <= 0)
             {
-                columeCount = 1;
+                this.columeCount = 1;
             }
 
+            // Reset visible count
+            this.visibleCount = 0;
+
             // Viewport
-            float viewportInterval = scrollRect.viewport.rect.height;
+            float viewportInterval = this.scrollRect.viewport.rect.height;
 
             // Check content direction pivot
-            if (this._contentDirCoeff == 0) this._contentDirCoeff = scrollRect.content.pivot.y > 0 ? 1f : -1f;
+            if (this._contentDirCoeff == 0) this._contentDirCoeff = this.scrollRect.content.pivot.y > 0 ? 1f : -1f;
 
             // Set content direction
-            float minViewport = scrollRect.content.anchoredPosition.y * this._contentDirCoeff;
+            float minViewport = this.scrollRect.content.anchoredPosition.y * this._contentDirCoeff;
             Vector2 viewportRange = new Vector2(minViewport - extendVisibleRange, minViewport + viewportInterval + extendVisibleRange);
 
             // Hide
-            float contentHeight = padding.top;
-            for (int i = 0; i < _dataList.Count; i += columeCount)
+            float contentHeight = this.padding.top;
+            switch (this.dataOrder)
             {
-                for (int j = 0; j < columeCount; j++)
-                {
-                    int index = i + j;
-                    if (index >= _dataList.Count)
-                        break;
-                    var visibleRange = new Vector2(contentHeight, contentHeight + _dataList[index].cellSize.y);
-                    if (visibleRange.y < viewportRange.x || visibleRange.x > viewportRange.y)
+                case DataOrder.Normal:
+                    for (int i = 0; i < this._dataList.Count; i += this.columeCount)
                     {
-                        RecycleCell(index);
+                        for (int j = 0; j < this.columeCount; j++)
+                        {
+                            int index = i + j;
+                            if (index >= this._dataList.Count)
+                                break;
+                            var visibleRange = new Vector2(contentHeight, contentHeight + this._dataList[index].cellSize.y);
+                            if (visibleRange.y < viewportRange.x || visibleRange.x > viewportRange.y)
+                            {
+                                this.RecycleCell(index);
+                            }
+                        }
+                        contentHeight += this._dataList[i].cellSize.y + this.spacing.y;
                     }
-                }
-                contentHeight += _dataList[i].cellSize.y + spacing.y;
+                    break;
+                case DataOrder.Reverse:
+                    for (int i = this._dataList.Count - 1; i >= 0; i -= this.columeCount)
+                    {
+                        for (int j = 0; j < this.columeCount; j++)
+                        {
+                            int index = i - j;
+                            if (index < 0 ||
+                                index >= this._dataList.Count)
+                                break;
+                            var visibleRange = new Vector2(contentHeight, contentHeight + this._dataList[index].cellSize.y);
+                            if (visibleRange.y < viewportRange.x || visibleRange.x > viewportRange.y)
+                            {
+                                this.RecycleCell(index);
+                            }
+                        }
+                        contentHeight += this._dataList[i].cellSize.y + this.spacing.y;
+                    }
+                    break;
             }
 
             // Show
-            contentHeight = padding.top;
-            for (int i = 0; i < _dataList.Count; i += columeCount)
+            contentHeight = this.padding.top;
+            float lastVisibleHeight = 0f;
+            switch (this.dataOrder)
             {
-                for (int j = 0; j < columeCount; j++)
-                {
-                    int index = i + j;
-                    if (index >= _dataList.Count)
-                        break;
-                    var visibleRange = new Vector2(contentHeight, contentHeight + _dataList[index].cellSize.y);
-                    if (visibleRange.y >= viewportRange.x && visibleRange.x <= viewportRange.y)
+                case DataOrder.Normal:
+                    for (int i = 0; i < this._dataList.Count; i += this.columeCount)
                     {
-                        InfiniteCell cell = null;
-                        if (_cellList[index] == null)
+                        for (int j = 0; j < this.columeCount; j++)
                         {
-                            if (_cellPool.Count > 0) cell = _cellPool.Dequeue();
-                            else Debug.Log("<color=#ff4242>The cell display error occurred, not enough cells in the cell pool!!!</color>");
+                            int index = i + j;
+                            if (index >= this._dataList.Count)
+                                break;
+                            var visibleRange = new Vector2(contentHeight, contentHeight + this._dataList[index].cellSize.y);
+                            if (visibleRange.y >= viewportRange.x && visibleRange.x <= viewportRange.y)
+                            {
+                                // Calcuate visible count
+                                this.visibleCount++;
+                                if (this.visibleCount % this.columeCount == 0) lastVisibleHeight = visibleRange.y;
+
+                                InfiniteCell cell = null;
+                                if (this._cellList[index] == null)
+                                {
+                                    if (this._cellPool.Count > 0) cell = this._cellPool.Dequeue();
+                                    else Debug.Log("<color=#ff4242>The cell display error occurred, not enough cells in the cell pool!!!</color>");
+                                }
+                                // Check cell direciton pivot
+                                float dirCoeff = 1f;
+                                if (cell != null) dirCoeff = cell.RectTransform.pivot.y > 0 ? -1f : 1f;
+                                this.SetupCell(cell, index, new Vector2((this._dataList[index].cellSize.x + this.spacing.x) * j + (this.padding.left - this.padding.right), contentHeight * dirCoeff));
+                                if (visibleRange.y >= viewportRange.x)
+                                    this._cellList[index]?.transform.SetAsLastSibling();
+                                else
+                                    this._cellList[index]?.transform.SetAsFirstSibling();
+                            }
                         }
-                        // Check cell direciton pivot
-                        float dirCoeff = 1f;
-                        if (cell != null) dirCoeff = cell.RectTransform.pivot.y > 0 ? -1f : 1f;
-                        SetupCell(cell, index, new Vector2((_dataList[index].cellSize.x + spacing.x) * j + (padding.left - padding.right), contentHeight * dirCoeff));
-                        if (visibleRange.y >= viewportRange.x)
-                            _cellList[index]?.transform.SetAsLastSibling();
-                        else
-                            _cellList[index]?.transform.SetAsFirstSibling();
+                        contentHeight += this._dataList[i].cellSize.y + this.spacing.y;
                     }
-                }
-                contentHeight += _dataList[i].cellSize.y + spacing.y;
+                    break;
+                case DataOrder.Reverse:
+                    for (int i = this._dataList.Count - 1; i >= 0; i -= this.columeCount)
+                    {
+                        for (int j = 0; j < this.columeCount; j++)
+                        {
+                            int index = i - j;
+                            if (index < 0 ||
+                              index >= this._dataList.Count)
+                                break;
+                            var visibleRange = new Vector2(contentHeight, contentHeight + this._dataList[index].cellSize.y);
+                            if (visibleRange.y >= viewportRange.x && visibleRange.x <= viewportRange.y)
+                            {
+                                // Calcuate visible count
+                                this.visibleCount++;
+                                if (this.visibleCount % this.columeCount == 0) lastVisibleHeight = visibleRange.y;
+
+                                InfiniteCell cell = null;
+                                if (this._cellList[index] == null)
+                                {
+                                    if (this._cellPool.Count > 0) cell = this._cellPool.Dequeue();
+                                    else Debug.Log("<color=#ff4242>The cell display error occurred, not enough cells in the cell pool!!!</color>");
+                                }
+                                // Check cell direciton pivot
+                                float dirCoeff = 1f;
+                                if (cell != null) dirCoeff = cell.RectTransform.pivot.y > 0 ? -1f : 1f;
+                                this.SetupCell(cell, index, new Vector2((this._dataList[index].cellSize.x + this.spacing.x) * j + (this.padding.left - this.padding.right), contentHeight * dirCoeff));
+                                if (visibleRange.y >= viewportRange.x)
+                                    this._cellList[index]?.transform.SetAsLastSibling();
+                                else
+                                    this._cellList[index]?.transform.SetAsFirstSibling();
+                            }
+                        }
+                        contentHeight += this._dataList[i].cellSize.y + this.spacing.y;
+                    }
+                    break;
+            }
+
+            // Calculate fill status
+            float visibleRangeHeight = viewportRange.y;
+            float visibleRangeSize = viewportRange.y - viewportRange.x;
+            this.isVisibleRangeFilled = lastVisibleHeight >= visibleRangeHeight;
+            if (this.visibleCount > this.lastMaxVisibleCount ||
+                visibleRangeSize != this.lastVisibleRangeSize)
+            {
+                this.lastMaxVisibleCount = this.visibleCount;
+                this.lastVisibleRangeSize = visibleRangeSize;
             }
 
             // Check scroll position
-            if (scrollRect.content.sizeDelta.y > viewportInterval)
+            if (this.scrollRect.content.sizeDelta.y > viewportInterval)
             {
-                this._isAtTop = viewportRange.x + extendVisibleRange <= _dataList[0].cellSize.y;
-                this._isAtBottom = scrollRect.content.sizeDelta.y - viewportRange.y + extendVisibleRange <= _dataList[_dataList.Count - 1].cellSize.y;
+                this._isAtTop = viewportRange.x + extendVisibleRange <= this._dataList[0].cellSize.y;
+                this._isAtBottom = this.scrollRect.content.sizeDelta.y - viewportRange.y + extendVisibleRange <= this._dataList[this._dataList.Count - 1].cellSize.y;
             }
             else
             {
@@ -89,121 +172,81 @@ namespace InfiniteScrollViews
             }
         }
 
+        public override void Snap(int index, float duration)
+        {
+            if (!this.IsInitialized())
+                return;
+            if (index >= this._dataList.Count ||
+                index < 0)
+                return;
+            var rowNumber = index / this.columeCount;
+            float height = this.padding.top;
+            for (int i = 0; i < rowNumber; i++)
+            {
+                height += this._dataList[i * this.columeCount].cellSize.y + this.spacing.y;
+            }
+
+            height = this.CalculateSnapPos(ScrollType.Vertical, this.snapAlign, height, this._dataList[index]);
+
+            if (this.scrollRect.content.anchoredPosition.y != height)
+            {
+                // Check content direction pivot
+                this.DoSnapping(new Vector2(0, height * this._contentDirCoeff), duration);
+            }
+        }
+        #endregion
+
+        #region Sealed Override
         public sealed override void Refresh(bool disabledRefreshCells = false)
         {
-            if (!IsInitialized()) return;
+            if (!this.IsInitialized()) return;
 
-            if (scrollRect.viewport.rect.height == 0)
+            if (this.scrollRect.viewport.rect.height == 0)
             {
-                DelayToRefresh(disabledRefreshCells).Forget();
+                this.DoDelayRefresh(disabledRefreshCells).Forget();
             }
             else
             {
-                DoRefresh(disabledRefreshCells);
+                this.DoRefresh(disabledRefreshCells);
             }
         }
 
         protected sealed override void DoRefresh(bool disabledRefreshCells)
         {
-            if (scrollRect == null) return;
+            if (this.scrollRect == null) return;
 
             if (!disabledRefreshCells)
             {
                 // Refresh content size
-                float height = padding.top;
-                for (int i = 0; i < _dataList.Count; i += columeCount)
+                float height = this.padding.top;
+                for (int i = 0; i < this._dataList.Count; i += this.columeCount)
                 {
-                    height += _dataList[i].cellSize.y + spacing.y;
+                    height += this._dataList[i].cellSize.y + this.spacing.y;
                 }
-                height += padding.bottom;
-                scrollRect.content.sizeDelta = new Vector2(scrollRect.content.sizeDelta.x, height);
+                height += this.padding.bottom;
+                this.scrollRect.content.sizeDelta = new Vector2(this.scrollRect.content.sizeDelta.x, height);
 
                 // Recycle all cells first
                 for (int i = 0; i < _cellList.Count; i++)
                 {
-                    RecycleCell(i);
+                    this.RecycleCell(i);
                 }
 
                 // Refresh cells view
-                this.RefreshCellVisibility();
+                this.DoRefreshVisibleCells();
 
                 // Invoke onRefresh callback
-                onRefreshed?.Invoke();
+                this.onRefreshed?.Invoke();
             }
             // Mark flag for refresh at next scrolling
             else this._disabledRefreshCells = true;
         }
 
-        protected sealed override async UniTask DelayToRefresh(bool disabledRefreshCells)
+        protected sealed override async UniTask DoDelayRefresh(bool disabledRefreshCells)
         {
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
-            DoRefresh(disabledRefreshCells);
+            this.DoRefresh(disabledRefreshCells);
         }
-
-        protected override void RefreshAndCheckVisibleInfo()
-        {
-            // Reset visible count
-            this.visibleCount = 0;
-
-            // Viewport
-            float viewportInterval = scrollRect.viewport.rect.height;
-
-            // Check content direction pivot
-            if (this._contentDirCoeff == 0) this._contentDirCoeff = scrollRect.content.pivot.y > 0 ? 1f : -1f;
-
-            // Set content direction
-            float minViewport = scrollRect.content.anchoredPosition.y * this._contentDirCoeff;
-            Vector2 viewportRange = new Vector2(minViewport - extendVisibleRange, minViewport + viewportInterval + extendVisibleRange);
-
-            // Show
-            float contentHeight = padding.top;
-            for (int i = 0; i < _dataList.Count; i += columeCount)
-            {
-                for (int j = 0; j < columeCount; j++)
-                {
-                    int index = i + j;
-                    if (index >= _dataList.Count)
-                        break;
-                    var visibleRange = new Vector2(contentHeight, contentHeight + _dataList[index].cellSize.y);
-                    if (visibleRange.y >= viewportRange.x && visibleRange.x <= viewportRange.y)
-                    {
-                        // Calcuate visible count
-                        this.visibleCount++;
-
-                        // Check filled flag
-                        if (_cellList[index] == null) this.isVisibleRangeFilled = false;
-                        else this.isVisibleRangeFilled = true;
-                    }
-                }
-                contentHeight += _dataList[i].cellSize.y + spacing.y;
-            }
-
-            // Adjust filled flag while cell removing
-            if (this.visibleCount < this.lastMaxVisibleCount) this.isVisibleRangeFilled = false;
-            this.lastMaxVisibleCount = this.visibleCount;
-        }
-
-        public override void Snap(int index, float duration)
-        {
-            if (!IsInitialized())
-                return;
-            if (index >= _dataList.Count ||
-                index < 0)
-                return;
-            var rowNumber = index / columeCount;
-            float height = padding.top;
-            for (int i = 0; i < rowNumber; i++)
-            {
-                height += _dataList[i * columeCount].cellSize.y + spacing.y;
-            }
-
-            height = this.CalculateSnapPos(ScrollType.Vertical, this.snapAlign, height, _dataList[index]);
-
-            if (scrollRect.content.anchoredPosition.y != height)
-            {
-                // Check content direction pivot
-                DoSnapping(new Vector2(0, height * this._contentDirCoeff), duration);
-            }
-        }
+        #endregion
     }
 }

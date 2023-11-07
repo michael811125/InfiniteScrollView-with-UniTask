@@ -11,6 +11,12 @@ namespace InfiniteScrollViews
     [RequireComponent(typeof(ScrollRect))]
     public abstract class InfiniteScrollView : UIBehaviour
     {
+        public enum DataOrder
+        {
+            Normal,
+            Reverse
+        }
+
         public enum SnapAlign
         {
             Start = 1,
@@ -40,9 +46,15 @@ namespace InfiniteScrollViews
 
         [Space()]
 
+        [Header("------ Cell Data Options ------")]
+        [Tooltip("If reverse is selected, these data indexes will be reversed.")]
+        public DataOrder dataOrder = DataOrder.Normal;
+
+        [Space()]
+
         [Header("------ Cell View Options ------")]
         public float extendVisibleRange;
-        [HideInInspector] public ScrollRect scrollRect;
+        public ScrollRect scrollRect { get; protected set; }
         protected List<InfiniteCellData> _dataList = new List<InfiniteCellData>();
         protected List<InfiniteCell> _cellList = new List<InfiniteCell>();
         protected Queue<InfiniteCell> _cellPool = new Queue<InfiniteCell>();
@@ -53,6 +65,7 @@ namespace InfiniteScrollViews
         protected bool _disabledRefreshCells = false;
         public int visibleCount { get; protected set; } = 0;
         public int lastMaxVisibleCount { get; protected set; } = 0;
+        public float lastVisibleRangeSize { get; protected set; } = 0f;
         public bool isVisibleRangeFilled { get; protected set; } = false;
 
         // Direction pivot 
@@ -79,6 +92,7 @@ namespace InfiniteScrollViews
             protected set;
         }
 
+        #region UIBehaviour
         protected override async void Awake()
         {
             if (this.initializePoolOnAwake)
@@ -87,6 +101,14 @@ namespace InfiniteScrollViews
             }
         }
 
+        protected override void OnRectTransformDimensionsChange()
+        {
+            base.OnRectTransformDimensionsChange();
+            this.onRectTransformDimensionsChanged?.Invoke();
+        }
+        #endregion
+
+        #region Data Info
         /// <summary>
         /// Get data count (Equals to cell count)
         /// </summary>
@@ -95,19 +117,27 @@ namespace InfiniteScrollViews
         {
             return this._dataList.Count;
         }
+        #endregion
 
+        #region Initialization
         /// <summary>
         /// Init infinite-cell of scrollView
         /// </summary>
         /// <returns></returns>
         public virtual async UniTask InitializePool(object args = null)
         {
-            if (isInitialized)
+            if (this.isInitialized)
                 return;
 
-            if (scrollRect == null) scrollRect = this.GetComponent<ScrollRect>();
-            scrollRect.onValueChanged.RemoveAllListeners();
-            scrollRect.onValueChanged.AddListener(OnValueChanged);
+            if (this.cellPrefab == null)
+            {
+                Debug.Log("<color=#ff66ab>[InfiniteScrollView] Initialization failed. <color=#ffad66>Cell prefab is null!!!</color></color>");
+                return;
+            }
+
+            if (this.scrollRect == null) this.scrollRect = this.GetComponent<ScrollRect>();
+            this.scrollRect.onValueChanged.RemoveAllListeners();
+            this.scrollRect.onValueChanged.AddListener(OnValueChanged);
 
             // Clear children
             foreach (Transform trans in this.scrollRect.content)
@@ -115,20 +145,22 @@ namespace InfiniteScrollViews
                 Destroy(trans.gameObject);
             }
 
-            _dataList.Clear();
-            _cellList.Clear();
-            _cellPool.Clear();
+            this._dataList.Clear();
+            this._cellList.Clear();
+            this._cellPool.Clear();
 
-            for (int i = 0; i < cellPoolSize; i++)
+            for (int i = 0; i < this.cellPoolSize; i++)
             {
-                var newCell = Instantiate(cellPrefab, scrollRect.content);
+                var newCell = Instantiate(this.cellPrefab, this.scrollRect.content);
                 await newCell.OnCreate(args);
                 newCell.gameObject.SetActive(false);
-                _cellPool.Enqueue(newCell);
+                this._cellPool.Enqueue(newCell);
             }
-            isInitialized = true;
+            this.isInitialized = true;
         }
+        #endregion
 
+        #region Refresh Visibility
         protected void OnValueChanged(Vector2 normalizedPosition)
         {
             // If ever set to false, must refresh all once
@@ -137,22 +169,22 @@ namespace InfiniteScrollViews
                 this._disabledRefreshCells = false;
                 this.Refresh();
             }
-            else this.RefreshCellVisibilityWithCheck();
+            else this.RefreshVisibleCells();
 
             // Invoke callback
             this.onValueChanged?.Invoke(normalizedPosition);
         }
 
-        public void RefreshCellVisibilityWithCheck()
-        {
-            if (!this.IsInitialized()) return;
-            this.RefreshCellVisibility();
-        }
-
         /// <summary>
         /// Refresh visible cells
         /// </summary>
-        protected abstract void RefreshCellVisibility();
+        public void RefreshVisibleCells()
+        {
+            if (!this.IsInitialized()) return;
+            this.DoRefreshVisibleCells();
+        }
+
+        protected abstract void DoRefreshVisibleCells();
 
         /// <summary>
         /// Refresh scrollView
@@ -163,20 +195,20 @@ namespace InfiniteScrollViews
 
         protected abstract void DoRefresh(bool disabledRefreshCells);
 
-        protected abstract UniTask DelayToRefresh(bool disabledRefreshCells);
-
-        protected abstract void RefreshAndCheckVisibleInfo();
+        protected abstract UniTask DoDelayRefresh(bool disabledRefreshCells);
 
         protected bool IsInitialized()
         {
             if (!this.isInitialized)
             {
-                Debug.Log("<color=#ff0073>[InfiniteScrollView] Please InitializePool first!!!</color>");
+                Debug.Log("<color=#ff66ab>[InfiniteScrollView] Please InitializePool first!!!</color>");
                 return false;
             }
             return true;
         }
+        #endregion
 
+        #region Cell Operation
         /// <summary>
         /// Add cell data
         /// </summary>
@@ -187,11 +219,10 @@ namespace InfiniteScrollViews
         {
             if (!this.IsInitialized()) return;
 
-            _dataList.Add(data);
-            _cellList.Add(null);
-            this.RefreshCellDataIndex(_dataList.Count - 1);
+            this._dataList.Add(data);
+            this._cellList.Add(null);
+            this.RefreshCellDataIndex(this._dataList.Count - 1);
             if (autoRefresh) this.Refresh();
-            this.RefreshAndCheckVisibleInfo();
         }
 
         /// <summary>
@@ -205,12 +236,12 @@ namespace InfiniteScrollViews
             if (!this.IsInitialized()) return false;
 
             // Insert including max count
-            if (index > _dataList.Count ||
+            if (index > this._dataList.Count ||
                 index < 0)
                 return false;
 
-            _dataList.Insert(index, data);
-            _cellList.Insert(index, null);
+            this._dataList.Insert(index, data);
+            this._cellList.Insert(index, null);
             this.RefreshCellDataIndex(index);
             return true;
         }
@@ -225,20 +256,44 @@ namespace InfiniteScrollViews
         {
             if (!this.IsInitialized()) return false;
 
-            if (index >= _dataList.Count ||
+            if (index >= this._dataList.Count ||
                 index < 0)
                 return false;
 
             this._dataList[index].Dispose();
             this._dataList.RemoveAt(index);
             this.RefreshCellDataIndex(index);
-            RecycleCell(index);
-            _cellList.RemoveAt(index);
+            this.RecycleCell(index);
+            this._cellList.RemoveAt(index);
             if (autoRefresh) this.Refresh();
-            this.RefreshAndCheckVisibleInfo();
             return true;
         }
 
+        /// <summary>
+        /// Clear cell data
+        /// </summary>
+        /// <returns></returns>
+        public virtual void Clear()
+        {
+            if (!this.IsInitialized()) return;
+
+            this.scrollRect.velocity = Vector2.zero;
+            this.scrollRect.content.anchoredPosition = Vector2.zero;
+            for (int i = 0; i < this._dataList.Count; i++)
+            {
+                this._dataList[i].Dispose();
+            }
+            this._dataList.Clear();
+            for (int i = 0; i < this._cellList.Count; i++)
+            {
+                this.RecycleCell(i);
+            }
+            this._cellList.Clear();
+            this.Refresh();
+        }
+        #endregion
+
+        #region Scroll Operation
         /// <summary>
         /// Scroll to top
         /// </summary>
@@ -273,6 +328,18 @@ namespace InfiniteScrollViews
         {
             if (this.scrollRect == null) return;
             this.scrollRect.horizontalNormalizedPosition = 1;
+        }
+
+        public float VerticalNormalizedPosition()
+        {
+            if (this.scrollRect == null) return -1;
+            return this.scrollRect.verticalNormalizedPosition;
+        }
+
+        public float HorizontalNormalizedPosition()
+        {
+            if (this.scrollRect == null) return -1;
+            return this.scrollRect.horizontalNormalizedPosition;
         }
 
         /// <summary>
@@ -324,7 +391,9 @@ namespace InfiniteScrollViews
             bool result = this._contentDirCoeff > 0 ? this._isAtLeft : this._isAtRight;
             return result;
         }
+        #endregion
 
+        #region Snapping
         /// <summary>
         /// Move to specific cell by index
         /// </summary>
@@ -338,7 +407,8 @@ namespace InfiniteScrollViews
         /// <param name="duration"></param>
         public void SnapFirst(float duration)
         {
-            Snap(0, duration);
+            int index = this.dataOrder == DataOrder.Normal ? 0 : this._dataList.Count - 1;
+            this.Snap(index, duration);
         }
 
         /// <summary>
@@ -347,7 +417,7 @@ namespace InfiniteScrollViews
         /// <param name="duration"></param>
         public void SnapMiddle(float duration)
         {
-            Snap((_dataList.Count - 1) >> 1, duration);
+            this.Snap((this._dataList.Count - 1) >> 1, duration);
         }
 
         /// <summary>
@@ -356,13 +426,13 @@ namespace InfiniteScrollViews
         /// <param name="duration"></param>
         public void SnapLast(float duration)
         {
-            Snap(_dataList.Count - 1, duration);
+            int index = this.dataOrder == DataOrder.Normal ? this._dataList.Count - 1 : 0;
+            this.Snap(index, duration);
         }
 
         protected void DoSnapping(Vector2 target, float duration)
         {
-            StopSnapping();
-
+            this.StopSnapping();
             this._cts = new CancellationTokenSource();
             this.ProcessSnapping(target, duration).Forget();
         }
@@ -379,27 +449,27 @@ namespace InfiniteScrollViews
 
         private async UniTask ProcessSnapping(Vector2 target, float duration)
         {
-            scrollRect.velocity = Vector2.zero;
+            this.scrollRect.velocity = Vector2.zero;
 
             if (duration <= 0)
             {
-                scrollRect.content.anchoredPosition = target;
+                this.scrollRect.content.anchoredPosition = target;
                 if (this._disabledRefreshCells)
                 {
                     this._disabledRefreshCells = false;
                     this.Refresh();
                 }
-                else this.RefreshCellVisibilityWithCheck();
+                else this.RefreshVisibleCells();
             }
             else
             {
-                Vector2 startPos = scrollRect.content.anchoredPosition;
+                Vector2 startPos = this.scrollRect.content.anchoredPosition;
                 float t = 0;
                 while (t < 1f)
                 {
                     t += Time.deltaTime / duration;
-                    scrollRect.content.anchoredPosition = Vector2.Lerp(startPos, target, t);
-                    var normalizedPos = scrollRect.normalizedPosition;
+                    this.scrollRect.content.anchoredPosition = Vector2.Lerp(startPos, target, t);
+                    var normalizedPos = this.scrollRect.normalizedPosition;
                     if (normalizedPos.y < 0 || normalizedPos.x > 1)
                     {
                         break;
@@ -418,77 +488,6 @@ namespace InfiniteScrollViews
             this._cts = null;
         }
 
-        protected void SetupCell(InfiniteCell cell, int index, Vector2 pos)
-        {
-            if (cell != null)
-            {
-                _cellList[index] = cell;
-                cell.CellData = _dataList[index];
-                cell.RectTransform.anchoredPosition = pos;
-                cell.onSelected += OnCellSelected;
-                cell.gameObject.SetActive(true);
-            }
-        }
-
-        protected void RecycleCell(int index)
-        {
-            if (_cellList[index] != null)
-            {
-                var cell = _cellList[index];
-                _cellList[index] = null;
-                cell.onSelected -= OnCellSelected;
-                cell.gameObject.SetActive(false);
-                cell.OnRecycle();
-                _cellPool.Enqueue(cell);
-            }
-        }
-
-        private void OnCellSelected(InfiniteCell selectedCell)
-        {
-            onCellSelected?.Invoke(selectedCell);
-        }
-
-        /// <summary>
-        /// Clear cell data
-        /// </summary>
-        /// <returns></returns>
-        public virtual void Clear()
-        {
-            if (!this.IsInitialized()) return;
-
-            scrollRect.velocity = Vector2.zero;
-            scrollRect.content.anchoredPosition = Vector2.zero;
-            for (int i = 0; i < _dataList.Count; i++)
-            {
-                _dataList[i].Dispose();
-            }
-            _dataList.Clear();
-            for (int i = 0; i < _cellList.Count; i++)
-            {
-                RecycleCell(i);
-            }
-            _cellList.Clear();
-            this.Refresh();
-        }
-
-        protected override void OnRectTransformDimensionsChange()
-        {
-            base.OnRectTransformDimensionsChange();
-            if (scrollRect)
-            {
-                onRectTransformDimensionsChanged?.Invoke();
-            }
-        }
-
-        private void RefreshCellDataIndex(int beginIndex)
-        {
-            // Optimized refresh efficiency
-            for (int i = beginIndex; i < _dataList.Count; i++)
-            {
-                _dataList[i].index = i;
-            }
-        }
-
         protected float CalculateSnapPos(ScrollType scrollType, SnapAlign snapPosType, float originValue, InfiniteCellData cellData)
         {
             float newValue = 0;
@@ -500,16 +499,16 @@ namespace InfiniteScrollViews
             {
                 case ScrollType.Horizontal:
 
-                    viewPortRectSizeValue = scrollRect.viewport.rect.width;
-                    contentRectSizeValue = scrollRect.content.rect.width;
+                    viewPortRectSizeValue = this.scrollRect.viewport.rect.width;
+                    contentRectSizeValue = this.scrollRect.content.rect.width;
                     cellSizeValue = cellData.cellSize.x;
 
                     break;
 
                 case ScrollType.Vertical:
 
-                    viewPortRectSizeValue = scrollRect.viewport.rect.height;
-                    contentRectSizeValue = scrollRect.content.rect.height;
+                    viewPortRectSizeValue = this.scrollRect.viewport.rect.height;
+                    contentRectSizeValue = this.scrollRect.content.rect.height;
                     cellSizeValue = cellData.cellSize.y;
 
                     break;
@@ -533,5 +532,47 @@ namespace InfiniteScrollViews
 
             return newValue;
         }
+        #endregion
+
+        #region Pool Operation
+        protected void SetupCell(InfiniteCell cell, int index, Vector2 pos)
+        {
+            if (cell != null)
+            {
+                this._cellList[index] = cell;
+                cell.CellData = this._dataList[index];
+                cell.RectTransform.anchoredPosition = pos;
+                cell.onSelected += this.OnCellSelected;
+                cell.gameObject.SetActive(true);
+            }
+        }
+
+        protected void RecycleCell(int index)
+        {
+            if (this._cellList[index] != null)
+            {
+                var cell = this._cellList[index];
+                this._cellList[index] = null;
+                cell.onSelected -= this.OnCellSelected;
+                cell.gameObject.SetActive(false);
+                cell.OnRecycle();
+                this._cellPool.Enqueue(cell);
+            }
+        }
+
+        private void OnCellSelected(InfiniteCell selectedCell)
+        {
+            this.onCellSelected?.Invoke(selectedCell);
+        }
+
+        private void RefreshCellDataIndex(int beginIndex)
+        {
+            // Optimized refresh efficiency
+            for (int i = beginIndex; i < this._dataList.Count; i++)
+            {
+                this._dataList[i].index = i;
+            }
+        }
+        #endregion
     }
 }

@@ -55,7 +55,7 @@ public class TestGUI_05 : MonoBehaviour
         var chatMessageHeight = heightInstrument.preferredHeight + baseCellHeight;
         var infiniteData = new InfiniteCellData(new Vector2(0, chatMessageHeight), chatCellData);
         chatScrollView.Add(infiniteData);
-        if (!chatScrollView.isVisibleRangeFilled) chatScrollView.Refresh();
-        else chatScrollView.Refresh(true);
+		// DisabledRefreshCells, if filled
+        chatScrollView.Refresh(chatScrollView.isVisibleRangeFilled);
     }
 }

@@ -1,5 +1,29 @@
 ## CHANGELOG
 
+## [1.5.0] - 2023-11-07
+- Added DataOrder.
+```C#
+    public enum DataOrder
+    {
+        Normal,
+        Reverse
+    }
+```
+- Added lastVisibleRangeSize param in InfiniteScrollView.
+```C#
+    public float lastVisibleRangeSize { get; protected set; }
+```
+- Renamed RefreshCellVisibilityWithCheck to RefreshVisibleCells in InfiniteScrollView.
+```C#
+    public void RefreshVisibleCells()
+```
+- Renamed RefreshCellVisibility to DoRefreshVisibleCells in InfiniteScrollView.
+```C#
+    protected abstract void DoRefreshVisibleCells();
+```
+- Removed RefreshAndCheckVisibleInfo from InfiniteScrollView.
+- Optimized code and refresh efficiency.
+
 ## [1.4.1] - 2023-11-03
 - Fixed Refresh method default value bug issue (disabledRefreshCells = false).
 - Added SnapFirst and SnapMiddle in InfiniteScrollView.
